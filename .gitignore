@@ -1,0 +1,58 @@
+# Virtual Environment
+.venv/
+venv/
+env/
+
+# Environment Variables
+.env
+
+# Python Cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Jupyter
+.ipynb_checkpoints/
+
+# VS Code
+.vscode/
+
+# macOS
+.DS_Store
+
+# LangSmith
+.langsmith/
+
+# ChromaDB
+Research_Agent/
+chromadb/
+chroma_db/
+
+# SQLite Memory
+*.db
+*.sqlite
+*.sqlite3
+
+# Logs
+*.log
+
+# Build Files
+build/
+dist/
+*.egg-info/
+
+# Temporary Files
+temp/
+tmp/
+
+# Secrets
+*.pem
+*.key
+
+# Coverage
+.coverage
+htmlcov/
+
+# Testing
+.pytest_cache/
