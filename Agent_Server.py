@@ -1,15 +1,84 @@
 from mcp.server.fastmcp import FastMCP
 mcp = FastMCP("Research_Agent")
 import ast
+import operator
+import math
+
+_OPERATORS = {
+    ast.Add: operator.add,
+    ast.Sub: operator.sub,
+    ast.Mult: operator.mul,
+    ast.Div: operator.truediv,
+    ast.FloorDiv: operator.floordiv,
+    ast.Mod: operator.mod,
+    ast.Pow: operator.pow,
+    ast.USub: operator.neg,
+    ast.UAdd: operator.pos,
+}
+
+_FUNCTIONS = {
+    "sqrt": math.sqrt,
+    "sin": math.sin,
+    "cos": math.cos,
+    "tan": math.tan,
+    "log": math.log,
+    "log10": math.log10,
+    "log2": math.log2,
+    "exp": math.exp,
+    "ceil": math.ceil,
+    "floor": math.floor,
+    "abs": abs,
+    "round": round,
+    "pow": math.pow,
+    "factorial": math.factorial,
+}
+
+_CONSTANTS = {
+    "pi": math.pi,
+    "e": math.e,
+}
+
+def _safe_eval_node(node):
+    if isinstance(node, ast.Expression):
+        return _safe_eval_node(node.body)
+    elif isinstance(node, ast.Constant):
+        return node.value
+    elif isinstance(node, ast.BinOp):
+        left = _safe_eval_node(node.left)
+        right = _safe_eval_node(node.right)
+        op_type = type(node.op)
+        if op_type in _OPERATORS:
+            return _OPERATORS[op_type](left, right)
+        raise TypeError(f"Unsupported binary operator: {op_type.__name__}")
+    elif isinstance(node, ast.UnaryOp):
+        operand = _safe_eval_node(node.operand)
+        op_type = type(node.op)
+        if op_type in _OPERATORS:
+            return _OPERATORS[op_type](operand)
+        raise TypeError(f"Unsupported unary operator: {op_type.__name__}")
+    elif isinstance(node, ast.Name):
+        if node.id in _CONSTANTS:
+            return _CONSTANTS[node.id]
+        raise NameError(f"Unknown constant: {node.id}")
+    elif isinstance(node, ast.Call):
+        if isinstance(node.func, ast.Name) and node.func.id in _FUNCTIONS:
+            args = [_safe_eval_node(arg) for arg in node.args]
+            return _FUNCTIONS[node.func.id](*args)
+        raise NameError(f"Unsupported function: {node.func}")
+    else:
+        raise TypeError(f"Unsupported expression element: {type(node).__name__}")
 
 # Calculator Tool 
 @mcp.tool() 
-def calculator(exec:str):
-    """ user given all aithmetic operations performed by this tool """
-    try : 
-        return str(ast.literal_eval(exec))
-    except Exception as e : 
-        return str(e) 
+def calculator(exec: str):
+    """Safely evaluates mathematical and arithmetic expressions. Supports +, -, *, /, %, **, ^, parentheses, sqrt, sin, cos, log, pi, e."""
+    try:
+        clean_expr = exec.strip().replace("^", "**")
+        tree = ast.parse(clean_expr, mode="eval")
+        result = _safe_eval_node(tree)
+        return str(result)
+    except Exception as e: 
+        return f"Calculation error: {e}" 
 
 
 # Weather tool
@@ -26,25 +95,28 @@ def weather(location :str):
 # File I/O Operations 
 import os
 @mcp.tool()
-def file_read(filename:str):
-    """ file read by this tool """
-    with open (file=filename) as f :
-        return f" content is : {f.read()}"
+def file_read(filename: str):
+    """Reads the contents of a local file from the file system. Example: 'notes.txt'"""
+    try:
+        with open(file=filename, mode="r", encoding="utf-8", errors="ignore") as f:
+            return f"Content of {filename}:\n{f.read()}"
+    except Exception as e:
+        return f"Error reading file '{filename}': {e}"
 
 @mcp.tool()
-def write_file(filename:str,content:str):
-    """ file writed by this tool . 
-    if file isn't existing then create it and also write the user given content on that
-    """
-    os.makedirs(
-        os.path.dirname(os.path.abspath(filename)),
-        exist_ok=True
-    )
+def write_file(filename: str, content: str):
+    """Creates or overwrites a local file on the file system with the given content."""
+    try:
+        dir_name = os.path.dirname(os.path.abspath(filename))
+        if dir_name:
+            os.makedirs(dir_name, exist_ok=True)
 
-    with open(file=filename, mode="w") as file:
-        res = file.write(content)
+        with open(file=filename, mode="w", encoding="utf-8") as file:
+            bytes_written = file.write(content)
 
-    return f"sucessfully created : {res}"
+        return f"Successfully wrote {bytes_written} characters to '{filename}'."
+    except Exception as e:
+        return f"Error writing to file '{filename}': {e}"
 
 
 # Load document 

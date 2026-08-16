@@ -1,0 +1,21 @@
+# ──────────────────────────────────────────────
+# Render Blueprint — One-click deploy
+# https://render.com/docs/blueprint-spec
+# ──────────────────────────────────────────────
+
+services:
+  - type: web
+    name: research-agent
+    runtime: python
+    plan: free
+    buildCommand: pip install -r Requirements.txt
+    startCommand: uvicorn app:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: GROQ_API_KEY
+        sync: false
+      - key: TAVILY_API_KEY
+        sync: false
+      - key: LANGSMITH_TRACING
+        value: "false"
+      - key: PYTHON_VERSION
+        value: "3.11.9"

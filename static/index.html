@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="AI Research Agent powered by MCP, LangGraph, LangChain & Groq. Ask research questions, perform calculations, check weather, and more.">
+    <title>Research Agent — AI Research Assistant</title>
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+    <!-- Syntax Highlighting -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+
+    <!-- App Styles -->
+    <link rel="stylesheet" href="/static/style.css">
+
+    <!-- Favicon (inline SVG data URI) -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔬</text></svg>">
+</head>
+<body>
+    <!-- Animated Background Orbs -->
+    <div class="bg-orb bg-orb-1" aria-hidden="true"></div>
+    <div class="bg-orb bg-orb-2" aria-hidden="true"></div>
+    <div class="bg-orb bg-orb-3" aria-hidden="true"></div>
+    <div class="bg-orb bg-orb-4" aria-hidden="true"></div>
+
+    <div class="app-container">
+        <!-- ═══════ Sidebar ═══════ -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-inner">
+                <!-- Logo -->
+                <div class="sidebar-header">
+                    <div class="logo">
+                        <div class="logo-icon">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="11" cy="11" r="8"/>
+                                <path d="M21 21l-4.35-4.35"/>
+                                <path d="M11 8v6"/>
+                                <path d="M8 11h6"/>
+                            </svg>
+                        </div>
+                        <div class="logo-text">
+                            <h1>Research Agent</h1>
+                            <span class="logo-sub">MCP · LangGraph · Groq</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Capabilities -->
+                <div class="sidebar-section">
+                    <h3 class="section-title">Capabilities</h3>
+                    <ul class="capability-list">
+                        <li class="capability-item">
+                            <div class="capability-icon" style="--cap-color: #8B5CF6;">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                            </div>
+                            <div class="capability-info">
+                                <span class="capability-name">Hybrid RAG</span>
+                                <span class="capability-desc">Vector + BM25 + RRF search</span>
+                            </div>
+                        </li>
+                        <li class="capability-item">
+                            <div class="capability-icon" style="--cap-color: #06B6D4;">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+                            </div>
+                            <div class="capability-info">
+                                <span class="capability-name">Web Search</span>
+                                <span class="capability-desc">Tavily fallback search</span>
+                            </div>
+                        </li>
+                        <li class="capability-item">
+                            <div class="capability-icon" style="--cap-color: #F59E0B;">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="10" x2="16" y2="10"/><line x1="8" y1="14" x2="12" y2="14"/></svg>
+                            </div>
+                            <div class="capability-info">
+                                <span class="capability-name">Calculator</span>
+                                <span class="capability-desc">Arithmetic operations</span>
+                            </div>
+                        </li>
+                        <li class="capability-item">
+                            <div class="capability-icon" style="--cap-color: #10B981;">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v4m0 12v4M4.93 4.93l2.83 2.83m8.48 8.48l2.83 2.83M2 12h4m12 0h4M4.93 19.07l2.83-2.83m8.48-8.48l2.83-2.83"/><circle cx="12" cy="12" r="4"/></svg>
+                            </div>
+                            <div class="capability-info">
+                                <span class="capability-name">Weather</span>
+                                <span class="capability-desc">Real-time location weather</span>
+                            </div>
+                        </li>
+                        <li class="capability-item">
+                            <div class="capability-icon" style="--cap-color: #EC4899;">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+                            </div>
+                            <div class="capability-info">
+                                <span class="capability-name">Research Tool</span>
+                                <span class="capability-desc">LLM-powered answers</span>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Tech Stack -->
+                <div class="sidebar-section">
+                    <h3 class="section-title">Tech Stack</h3>
+                    <div class="tech-tags">
+                        <span class="tech-tag">MCP</span>
+                        <span class="tech-tag">LangGraph</span>
+                        <span class="tech-tag">LangChain</span>
+                        <span class="tech-tag">Groq</span>
+                        <span class="tech-tag">ChromaDB</span>
+                        <span class="tech-tag">BM25</span>
+                        <span class="tech-tag">Tavily</span>
+                        <span class="tech-tag">FastAPI</span>
+                    </div>
+                </div>
+
+                <!-- Architecture -->
+                <div class="sidebar-section">
+                    <h3 class="section-title">Architecture</h3>
+                    <div class="arch-flow">
+                        <div class="arch-step">User Query</div>
+                        <div class="arch-arrow">↓</div>
+                        <div class="arch-step">ReAct Agent</div>
+                        <div class="arch-arrow">↓</div>
+                        <div class="arch-step">MCP Tools</div>
+                        <div class="arch-arrow">↓</div>
+                        <div class="arch-step accent">Groq LLM</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <div class="sidebar-footer">
+                <div class="author-card">
+                    <div class="author-avatar">DH</div>
+                    <div class="author-info">
+                        <span class="author-name">Debajyoti Hazra</span>
+                        <span class="author-role">BCA Student · AI &amp; GenAI</span>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Sidebar Overlay (mobile) -->
+        <div class="sidebar-overlay" id="sidebarOverlay" aria-hidden="true"></div>
+
+        <!-- ═══════ Chat Area ═══════ -->
+        <main class="chat-main">
+            <!-- Header -->
+            <header class="chat-header">
+                <button class="icon-btn menu-btn" id="menuBtn" aria-label="Toggle sidebar">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+                </button>
+                <div class="header-center">
+                    <h2>Research Agent</h2>
+                    <div class="status-badge">
+                        <span class="status-dot"></span>
+                        <span>Online</span>
+                    </div>
+                </div>
+                <button class="icon-btn new-chat-btn" id="newChatBtn" aria-label="New conversation" title="New Chat">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                </button>
+            </header>
+
+            <!-- Messages Container -->
+            <div class="messages-container" id="messagesContainer">
+                <!-- Welcome Screen -->
+                <div class="welcome" id="welcomeSection">
+                    <div class="welcome-glow" aria-hidden="true"></div>
+                    <div class="welcome-icon">
+                        <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="url(#wgrad)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                            <defs>
+                                <linearGradient id="wgrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                                    <stop offset="0%" style="stop-color:#8B5CF6"/>
+                                    <stop offset="50%" style="stop-color:#3B82F6"/>
+                                    <stop offset="100%" style="stop-color:#06B6D4"/>
+                                </linearGradient>
+                            </defs>
+                            <circle cx="11" cy="11" r="8"/>
+                            <path d="M21 21l-4.35-4.35"/>
+                            <path d="M11 8v6"/>
+                            <path d="M8 11h6"/>
+                        </svg>
+                    </div>
+                    <h2 class="welcome-title">How can I help with your research?</h2>
+                    <p class="welcome-desc">Ask me about your research papers, perform calculations, check weather, or explore the web.</p>
+
+                    <div class="suggestions" id="suggestions">
+                        <button class="suggestion-card" data-query="What is Retrieval Augmented Generation?">
+                            <span class="suggestion-emoji">📄</span>
+                            <span class="suggestion-label">What is Retrieval Augmented Generation?</span>
+                        </button>
+                        <button class="suggestion-card" data-query="Explain the RAG pipeline architecture in detail">
+                            <span class="suggestion-emoji">🔬</span>
+                            <span class="suggestion-label">Explain the RAG pipeline architecture</span>
+                        </button>
+                        <button class="suggestion-card" data-query="256 * 48 + 1024">
+                            <span class="suggestion-emoji">🧮</span>
+                            <span class="suggestion-label">Calculate 256 × 48 + 1024</span>
+                        </button>
+                        <button class="suggestion-card" data-query="What is the weather in Ranchi?">
+                            <span class="suggestion-emoji">🌤️</span>
+                            <span class="suggestion-label">What's the weather in Ranchi?</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Input Area -->
+            <div class="input-area">
+                <!-- Drag and Drop Overlay -->
+                <div class="drag-drop-overlay" id="dragDropOverlay" aria-hidden="true">
+                    <div class="drag-drop-content">
+                        <div class="drag-drop-icon">
+                            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                                <polyline points="17 8 12 3 7 8"/>
+                                <line x1="12" y1="3" x2="12" y2="15"/>
+                            </svg>
+                        </div>
+                        <p class="drag-drop-text">Drop PDF or document here to analyze</p>
+                        <span class="drag-drop-sub">Supports PDF, TXT, MD, CSV (up to 15 MB)</span>
+                    </div>
+                </div>
+
+                <!-- Attachment Preview (shown when file is selected) -->
+                <div class="attachment-preview-container" id="attachmentPreviewContainer" hidden>
+                    <div class="attachment-pill">
+                        <div class="attachment-pill-icon" id="attachmentPillIcon">📄</div>
+                        <div class="attachment-pill-details">
+                            <span class="attachment-pill-name" id="attachmentPillName">document.pdf</span>
+                            <span class="attachment-pill-status" id="attachmentPillStatus">Ready to send</span>
+                        </div>
+                        <button class="attachment-pill-remove" id="attachmentPillRemove" aria-label="Remove attachment" title="Remove file">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="18" y1="6" x2="6" y2="18"/>
+                                <line x1="6" y1="6" x2="18" y2="18"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Upload Status Bar (for active upload feedback) -->
+                <div class="upload-status" id="uploadStatus" hidden>
+                    <div class="upload-status-inner">
+                        <div class="upload-spinner"></div>
+                        <span class="upload-status-text" id="uploadStatusText">Uploading...</span>
+                        <button class="upload-dismiss" id="uploadDismiss" hidden aria-label="Dismiss">&times;</button>
+                    </div>
+                    <div class="upload-progress-bar" id="uploadProgressBar"></div>
+                </div>
+
+                <div class="input-wrapper">
+                    <!-- Hidden file input -->
+                    <input type="file" id="fileInput" accept=".pdf,.txt,.md,.csv" hidden>
+                    <!-- Upload/Attach button -->
+                    <button class="icon-btn attach-btn" id="attachBtn" aria-label="Upload document" title="Attach PDF, TXT, or MD file">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/>
+                        </svg>
+                    </button>
+                    <textarea
+                        id="userInput"
+                        placeholder="Ask a question about your research or attached document…"
+                        rows="1"
+                        aria-label="Type your message"
+                    ></textarea>
+                    <button class="send-btn" id="sendBtn" disabled aria-label="Send message" title="Send message">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M22 2L11 13"/>
+                            <path d="M22 2L15 22L11 13L2 9L22 2Z"/>
+                        </svg>
+                    </button>
+                </div>
+                <p class="input-footer">Powered by <strong>Groq LLM</strong> · Hybrid RAG · MCP Protocol · <span class="upload-hint" id="uploadHint">📎 Attach PDF / doc</span></p>
+            </div>
+        </main>
+    </div>
+
+    <!-- Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/12.0.1/marked.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+
+    <!-- App -->
+    <script src="/static/app.js"></script>
+</body>
+</html>

@@ -12,3 +12,7 @@ rank-bm25
 tavily-python
 mcp
 langchain-ollama
+langchain-mcp-adapters
+requests
+fastapi
+uvicorn[standard]

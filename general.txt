@@ -1,0 +1,299 @@
+1. **What is the chemical symbol for water?**
+   - H₂O
+
+2. **What planet is known as the Red Planet?**
+   - Mars
+
+3. **What gas do plants absorb from the atmosphere for photosynthesis?**
+   - Carbon dioxide (CO₂)
+
+4. **Who proposed the theory of relativity?**
+   - Albert Einstein
+
+5. **What is the hardest natural substance on Earth?**
+   - Diamond
+
+6. **What is the speed of light in a vacuum?**
+   - Approximately 299,792 kilometers per second (km/s)
+
+7. **What particle carries a negative electric charge?**
+   - Electron
+
+8. **What is the main component of the Sun's energy production?**
+   - Nuclear fusion of hydrogen into helium
+
+9. **What organ pumps blood throughout the human body?**
+   - The heart
+
+10. **What is the basic unit of life?**
+   - The cell
+
+11. **What force keeps planets in orbit around the Sun?**
+   - Gravity
+
+12. **What is the process by which a liquid turns into a gas?**
+   - Evaporation
+
+13. **What element has the atomic number 1?**
+   - Hydrogen
+
+14. **What is the term for a species that no longer exists?**
+   - Extinct
+
+15. **What part of the eye controls the amount of light that enters?**
+   - The pupil
+
+16. **What is the study of insects called?**
+   - Entomology
+
+17. **What is the largest organ in the human body?**
+   - Skin
+
+18. **What is the main gas in Earth's atmosphere?**
+   - Nitrogen (about 78%)
+
+19. **What phenomenon explains why the sky appears blue?**
+   - Rayleigh scattering
+
+20. **What is the unit of electrical resistance?**
+   - Ohm (Ω)
+
+21. **What is the chemical formula for table salt?**
+   - NaCl (sodium chloride)
+
+22. **What type of bond involves the sharing of electron pairs between atoms?**
+   - Covalent bond
+
+23. **What is the name of the galaxy that contains our Solar System?**
+   - The Milky Way
+
+24. **What is the process of cell division that results in two identical daughter cells?**
+   - Mitosis
+
+25. **What is the name of the force that opposes motion between two surfaces?**
+   - Friction
+
+26. **What is the term for a substance that speeds up a chemical reaction without being consumed?**
+   - Catalyst
+
+27. **What is the primary function of red blood cells?**
+   - To transport oxygen throughout the body
+
+28. **What is the most abundant element in the universe?**
+   - Hydrogen
+
+29. **What is the name of the layer of Earth that lies directly below the crust?**
+   - Mantle
+
+30. **What is the scientific term for a “star that suddenly increases in brightness then fades gradually”?**
+   - Supernova
+
+31. **What is the branch of science that studies the Earth's atmosphere?**
+   - Meteorology
+
+32. **What is the smallest unit of an element that retains its chemical properties?**
+   - Atom
+
+33. **What does DNA stand for?**
+   - Deoxyribonucleic Acid
+
+34. **What is the term for the measure of an object's resistance to changes in motion?**
+   - Inertia
+
+35. **What is the name of the process by which plants release water vapor through their leaves?**
+   - Transpiration
+
+36. **What is the main cause of ocean tides?**
+   - Gravitational pull of the Moon (and to a lesser extent, the Sun)
+
+37. **What is the unit of frequency?**
+   - Hertz (Hz)
+
+38. **What is the name of the protein that carries oxygen in red blood cells?**
+   - Hemoglobin
+
+39. **What is the principle that states energy cannot be created or destroyed?**
+   - Conservation of Energy (First Law of Thermodynamics)
+
+40. **What is the term for a solid that melts directly into a gas without becoming a liquid?**
+   - Sublimation
+
+41. **What is the most common type of blood vessel in the human body?**
+   - Capillaries
+
+42. **What is the name of the device that measures atmospheric pressure?**
+   - Barometer
+
+43. **What is the name of the force that holds the nucleus together?**
+   - Strong nuclear force
+
+44. **What is the term for a species that exists in only one geographic location?**
+   - Endemic
+
+45. **What is the name of the process that converts glucose into pyruvate, producing ATP?**
+   - Glycolysis
+
+46. **What is the unit of luminous intensity?**
+   - Candela (cd)
+
+47. **What is the scientific study of fossils called?**
+   - Paleontology
+
+48. **What is the term for a chemical reaction that absorbs heat from its surroundings?**
+   - Endothermic reaction
+
+49. **What is the name of the largest planet in our Solar System?**
+   - Jupiter
+
+50. **What is the term for a wave that travels through a medium by particle displacement?**
+   - Mechanical wave
+
+51. **What is the name of the organ responsible for filtering blood in the human body?**
+   - Kidneys
+
+52. **What is the chemical symbol for gold?**
+   - Au
+
+53. **What is the term for the amount of matter in an object?**
+   - Mass
+
+54. **What is the name of the theory that explains the origin of the universe as a rapid expansion?**
+   - The Big Bang Theory
+
+55. **What is the primary pigment that gives plants their green color?**
+   - Chlorophyll
+
+56. **What is the name of the process by which a solid turns directly into a liquid?**
+   - Melting (fusion)
+
+57. **What is the unit of electric current?**
+   - Ampere (A)
+
+58. **What is the term for a chemical bond formed by the transfer of electrons?**
+   - Ionic bond
+
+59. **What is the name of the layer of the Sun that we see as its surface?**
+   - Photosphere
+
+60. **What is the term for a disease caused by a deficiency of vitamin C?**
+   - Scurvy
+
+61. **What is the name of the instrument that measures earthquakes?**
+   - Seismometer
+
+62. **What is the term for the amount of space an object occupies?**
+   - Volume
+
+63. **What is the main component of natural gas?**
+   - Methane (CH₄)
+
+64. **What is the name of the process by which a liquid becomes a solid?**
+   - Freezing (solidification)
+
+65. **What is the term for a reaction that releases energy in the form of heat?**
+   - Exothermic reaction
+
+66. **What is the name of the scientist who developed the laws of planetary motion?**
+   - Johannes Kepler
+
+67. **What is the unit of pressure?**
+   - Pascal (Pa)
+
+68. **What is the term for a species that can interbreed and produce fertile offspring?**
+   - Biological species (or simply "species")
+
+69. **What is the name of the part of a plant that conducts water from roots to leaves?**
+   - Xylem
+
+70. **What is the name of the phenomenon where light bends as it passes from one medium to another?**
+   - Refraction
+
+71. **What is the term for the total amount of energy stored in a system?**
+   - Potential energy (or total energy)
+
+72. **What is the name of the particle that mediates the electromagnetic force?**
+   - Photon
+
+73. **What is the name of the organ that produces insulin?**
+   - Pancreas
+
+74. **What is the term for a material that does not allow electric current to flow easily?**
+   - Insulator
+
+75. **What is the name of the process that creates new genetic combinations during sexual reproduction?**
+   - Meiosis (specifically crossing over)
+
+76. **What is the term for the distance between two consecutive peaks of a wave?**
+   - Wavelength
+
+77. **What is the name of the scale used to measure the acidity or basicity of a solution?**
+   - pH scale
+
+78. **What is the term for a reaction that occurs without an external catalyst?**
+   - Autocatalytic reaction (or simply a spontaneous reaction)
+
+79. **What is the name of the galaxy that is the closest to the Milky Way?**
+   - Andromeda Galaxy (M31)
+
+80. **What is the term for the energy stored in an object due to its position or arrangement?**
+   - Potential energy
+
+81. **What is the name of the phenomenon where an object appears to change direction when viewed through a moving medium?**
+   - Refraction (or apparent shift)
+
+82. **What is the scientific term for "water that has dissolved salts and minerals"?**
+   - Brine (or saline water)
+
+83. **What is the name of the force that causes objects to fall toward the Earth?**
+   - Gravity
+
+84. **What is the term for the smallest particle of a chemical element that retains its properties?**
+   - Atom
+
+85. **What is the name of the organ responsible for hearing in humans?**
+   - The ear (specifically the cochlea for sound transduction)
+
+86. **What is the unit of energy?**
+   - Joule (J)
+
+87. **What is the name of the process by which plants convert light energy into chemical energy?**
+   - Photosynthesis
+
+88. **What is the term for a type of radiation that can pass through most materials, including human tissue?**
+   - Gamma radiation
+
+89. **What is the name of the principle that states that the total entropy of an isolated system can never decrease over time?**
+   - Second Law of Thermodynamics
+
+90. **What is the term for a reaction that proceeds in the opposite direction of the forward reaction?**
+   - Reverse reaction (or backward reaction)
+
+91. **What is the name of the instrument used to measure temperature?**
+   - Thermometer
+
+92. **What is the term for a solid material that can be shaped or molded when heated and hardens upon cooling?**
+   - Thermoplastic (or polymer)
+
+93. **What is the name of the force that acts between two electrically charged objects?**
+   - Electrostatic force (or Coulomb force)
+
+94. **What is the term for the process by which a liquid spreads over a solid surface?**
+   - Wetting (or capillary action)
+
+95. **What is the name of the largest bone in the human body?**
+   - Femur
+
+96. **What is the term for the phenomenon where an object's motion appears to be slowed down when moving at speeds close to the speed of light?**
+   - Time dilation
+
+97. **What is the name of the process that removes waste products from the blood in the kidneys?**
+   - Filtration (part of urine formation)
+
+98. **What is the term for a chemical substance that speeds up a reaction and is not consumed in the process?**
+   - Catalyst
+
+99. **What is the name of the region of the brain responsible for coordination and balance?**
+   - Cerebellum
+
+100. **What is the term for the measure of how much matter is packed into a given volume?**
+   - Density
