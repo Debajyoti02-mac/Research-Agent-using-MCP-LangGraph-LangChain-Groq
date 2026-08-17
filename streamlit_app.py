@@ -318,58 +318,85 @@ with st.sidebar:
 
     st.markdown("### 📄 Document Knowledge Base")
     uploaded_file = st.file_uploader(
-        "Upload PDF or TXT to Index",
+        "Upload PDF, TXT or Markdown Document",
         type=["pdf", "txt", "md", "csv"],
-        help="Attached documents are automatically chunked and indexed into ChromaDB vectors for Hybrid RAG.",
+        help="Attached documents are automatically chunked and indexed into ChromaDB vectors for instant Hybrid RAG search.",
     )
 
     if uploaded_file is not None:
-        if st.button("📥 Index Uploaded Document", use_container_width=True):
-            with st.spinner("Processing & indexing document chunks into ChromaDB..."):
-                try:
-                    filename = uploaded_file.name
-                    suffix = os.path.splitext(filename)[1].lower()
-                    contents = uploaded_file.read()
+        file_key = f"indexed_{uploaded_file.name}_{uploaded_file.size}"
+        if file_key not in st.session_state:
+            st.session_state[file_key] = False
 
-                    with tempfile.NamedTemporaryFile(delete=False, suffix=suffix) as tmp:
-                        tmp.write(contents)
-                        tmp_path = tmp.name
+        if not st.session_state[file_key]:
+            if st.button("📥 Index Document into Knowledge Base", use_container_width=True, type="primary"):
+                with st.spinner("Processing & indexing document chunks into ChromaDB..."):
+                    try:
+                        filename = uploaded_file.name
+                        suffix = os.path.splitext(filename)[1].lower()
+                        contents = uploaded_file.read()
 
-                    Agent_Server.initialize_rag()
+                        with tempfile.NamedTemporaryFile(delete=False, suffix=suffix) as tmp:
+                            tmp.write(contents)
+                            tmp_path = tmp.name
 
-                    if suffix == ".pdf":
-                        loader = PyPDFLoader(tmp_path)
-                        pages = loader.load()
-                    else:
-                        text_content = contents.decode("utf-8", errors="ignore")
-                        pages = [Document(page_content=text_content, metadata={"source": filename})]
+                        Agent_Server.initialize_rag()
 
-                    splitter = RecursiveCharacterTextSplitter(chunk_overlap=180, chunk_size=1200)
-                    texts = splitter.split_documents(pages)
-                    new_chunks = [t.page_content for t in texts]
-                    new_metadata = [{**t.metadata, "source": filename} for t in texts]
+                        pages = []
+                        if suffix == ".pdf":
+                            try:
+                                loader = PyPDFLoader(tmp_path)
+                                pages = loader.load()
+                            except Exception:
+                                import pypdf
+                                reader = pypdf.PdfReader(tmp_path)
+                                for idx, p in enumerate(reader.pages):
+                                    text = p.extract_text() or ""
+                                    if text.strip():
+                                        pages.append(Document(page_content=text, metadata={"source": filename, "page": idx + 1}))
+                        else:
+                            text_content = contents.decode("utf-8", errors="ignore")
+                            pages = [Document(page_content=text_content, metadata={"source": filename})]
 
-                    if new_chunks:
-                        start_id = Agent_Server.collection.count()
-                        Agent_Server.collection.add(
-                            ids=[str(i) for i in range(start_id, start_id + len(new_chunks))],
-                            documents=new_chunks,
-                            metadatas=new_metadata,
-                        )
-                        st.success(f"✓ Indexed **{len(new_chunks)}** chunks from `{filename}` successfully!")
-                    else:
-                        st.warning("No readable text found in document.")
+                        splitter = RecursiveCharacterTextSplitter(chunk_overlap=180, chunk_size=1200)
+                        texts = splitter.split_documents(pages)
+                        new_chunks = [t.page_content for t in texts]
+                        new_metadata = [{**t.metadata, "source": filename} for t in texts]
 
-                    if os.path.exists(tmp_path):
-                        os.remove(tmp_path)
+                        if new_chunks and Agent_Server.collection is not None:
+                            import time
+                            ts = int(time.time())
+                            chunk_ids = [f"{filename}_{i}_{ts}" for i in range(len(new_chunks))]
+                            Agent_Server.collection.add(
+                                ids=chunk_ids,
+                                documents=new_chunks,
+                                metadatas=new_metadata,
+                            )
+                            st.session_state[file_key] = True
+                            st.success(f"✓ Indexed **{len(new_chunks)}** chunks from `{filename}`!")
+                            st.session_state.messages.append(
+                                {
+                                    "role": "assistant",
+                                    "content": f"📄 **Document Indexed**: I have successfully indexed `{filename}` ({len(new_chunks)} chunks). You can now ask questions or request summaries about this document!",
+                                    "tools": ["Hybrid_Rag"],
+                                }
+                            )
+                            st.rerun()
+                        else:
+                            st.warning("No readable text could be extracted from this file.")
 
-                except Exception as e:
-                    st.error(f"Upload failed: {e}")
+                        if os.path.exists(tmp_path):
+                            os.remove(tmp_path)
+
+                    except Exception as e:
+                        st.error(f"Upload failed: {e}")
+        else:
+            st.success(f"✓ `{uploaded_file.name}` is indexed and ready for queries.")
 
     try:
         Agent_Server.initialize_rag()
         total_chunks = Agent_Server.collection.count() if Agent_Server.collection else 0
-        st.info(f"📊 **ChromaDB Index:** {total_chunks} active chunks")
+        st.info(f"📊 **Knowledge Base Index:** {total_chunks} active chunks")
     except Exception:
         pass
 

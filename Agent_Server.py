@@ -329,6 +329,17 @@ def initialize_rag():
 
     import chromadb
 
+    client = chromadb.PersistentClient(path="./Research_Agent")
+
+    # 1. Try loading existing collection using its persisted configuration
+    try:
+        collection = client.get_collection(name="Agent")
+        print(f"Existing Chroma collection 'Agent' loaded ({collection.count()} chunks).")
+        return
+    except Exception:
+        pass
+
+    # 2. If collection doesn't exist yet, determine embedding function and create it
     cohere_key = os.getenv("COHERE_API_KEY")
     if cohere_key:
         try:
@@ -348,20 +359,11 @@ def initialize_rag():
             model_name="all-MiniLM-L6-v2"
         )
 
-    client = chromadb.PersistentClient(path="./Research_Agent")
-
-    try:
-        collection = client.get_collection(
-            name="Agent",
-            embedding_function=embedding_function,
-        )
-    except Exception:
-        collection = client.get_or_create_collection(
-            name="Agent",
-            embedding_function=embedding_function,
-        )
-
-    print("Existing Chroma loaded.")
+    collection = client.get_or_create_collection(
+        name="Agent",
+        embedding_function=embedding_function,
+    )
+    print(f"Chroma collection 'Agent' initialized ({collection.count()} chunks).")
 
 
 # =====================================
@@ -370,41 +372,40 @@ def initialize_rag():
 
 @mcp.tool()
 def Hybrid_Rag(query: str):
-
     """
-    Retrieve relevant information
-    from existing ChromaDB.
+    Retrieve relevant excerpts and research context from indexed documents, papers, or uploaded PDFs in ChromaDB.
     """
-
     initialize_rag()
 
-    llm = get_llm()
+    if collection is None or collection.count() == 0:
+        return "No indexed documents found in the database. Please upload a PDF or document in the sidebar first."
 
-    query_refine = llm.invoke(
-        f"Refine this query:\n{query}"
-    ).content
+    n_results = min(5, max(1, collection.count()))
+    try:
+        result = collection.query(
+            query_texts=[query],
+            n_results=n_results,
+        )
+        docs = result.get("documents", [[]])[0]
+        if docs:
+            return "\n\n---\n\n".join(docs)
+    except Exception as e:
+        print(f"ChromaDB query warning: {e}")
 
-    result = collection.query(
-        query_texts=[query_refine],
-        n_results=5
-    )
+    # Fallback to Tavily web search if API key is provided
+    tavily_key = os.getenv("TAVILY_API_KEY")
+    if tavily_key:
+        try:
+            from tavily import TavilyClient
+            tavily = TavilyClient(api_key=tavily_key)
+            response = tavily.search(query=query)
+            results = response.get("results", [])
+            if results:
+                return "\n\n".join([f"**{r.get('title', '')}**\n{r.get('content', '')}" for r in results])
+        except Exception:
+            pass
 
-    docs = result["documents"][0]
-
-    if docs:
-        return "\n\n".join(docs)
-
-    from tavily import TavilyClient
-
-    tavily = TavilyClient(
-        api_key=os.getenv("TAVILY_API_KEY")
-    )
-
-    response = tavily.search(
-        query=query_refine
-    )
-
-    return str(response["results"])
+    return "No matching document excerpts found in the knowledge base."
 
 
 # =====================================
@@ -413,20 +414,22 @@ def Hybrid_Rag(query: str):
 
 @mcp.tool()
 def Research_tool(query: str):
-
+    """
+    Answer research and document questions using context retrieved from the indexed knowledge base.
+    """
     context = Hybrid_Rag(query)
 
     llm = get_llm()
 
-    prompt = f"""
-Answer the question using the context.
+    prompt = f"""Use the following retrieved context from the uploaded documents to answer the question clearly, concisely, and accurately.
 
-Context:
+Retrieved Context:
 {context}
 
 Question:
 {query}
-"""
+
+Answer:"""
 
     return llm.invoke(prompt).content
 
