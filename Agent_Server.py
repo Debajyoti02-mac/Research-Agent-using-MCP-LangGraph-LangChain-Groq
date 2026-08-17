@@ -230,23 +230,34 @@ def weather(location: str):
 # File Read
 # =====================================
 
+def _find_file_case_insensitive(filename: str, search_dirs=("uploads", ".")):
+    target = os.path.basename(filename).strip().strip("\"'").lower()
+    for d in search_dirs:
+        if os.path.exists(d) and os.path.isdir(d):
+            for f in os.listdir(d):
+                if f.lower() == target:
+                    return os.path.join(d, f)
+                if os.path.splitext(f)[0].lower() == os.path.splitext(target)[0].lower():
+                    return os.path.join(d, f)
+    # If single document exists in uploads
+    if os.path.exists("uploads") and os.path.isdir("uploads"):
+        files = [f for f in os.listdir("uploads") if not f.startswith(".")]
+        if len(files) == 1:
+            return os.path.join("uploads", files[0])
+    return None
+
+
 @mcp.tool()
 def file_read(filename: str):
     """Read content from a local file or PDF document. Example: 'notes.txt', 'cv.pdf', 'paper.pdf'."""
     try:
         clean_name = str(filename).strip().strip("\"'")
-        possible_paths = [
-            clean_name,
-            os.path.join("uploads", clean_name),
-            os.path.join("uploads", os.path.basename(clean_name)),
-            os.path.basename(clean_name),
-        ]
 
         found_path = None
-        for p in possible_paths:
-            if os.path.exists(p) and os.path.isfile(p):
-                found_path = p
-                break
+        if os.path.exists(clean_name) and os.path.isfile(clean_name):
+            found_path = clean_name
+        else:
+            found_path = _find_file_case_insensitive(clean_name)
 
         if found_path:
             if found_path.lower().endswith(".pdf"):
@@ -261,22 +272,22 @@ def file_read(filename: str):
                 with open(found_path, "r", encoding="utf-8", errors="ignore") as f:
                     return f.read()
 
-        # If not found on local disk, check if it was indexed in ChromaDB vector store
+        # If not found on local disk, search ChromaDB vector store
         initialize_rag()
         if collection is not None and collection.count() > 0:
-            query_res = collection.get(where={"source": os.path.basename(clean_name)})
-            docs = query_res.get("documents", [])
-            if docs:
-                return "\n\n---\n\n".join(docs)
-            # If exact where clause didn't match, do a search with Hybrid_Rag
+            try:
+                query_res = collection.get(where={"source": os.path.basename(clean_name)})
+                docs = query_res.get("documents", [])
+                if docs:
+                    return "\n\n---\n\n".join(docs)
+            except Exception:
+                pass
+
             rag_res = Hybrid_Rag(clean_name)
             if rag_res and "No matching" not in rag_res and "No indexed" not in rag_res:
                 return rag_res
 
         return f"Error: File '{clean_name}' not found on filesystem or knowledge base."
-
-    except Exception as e:
-        return f"Error reading file '{filename}': {str(e)}"
 
     except Exception as e:
         return f"Error reading file '{filename}': {str(e)}"
