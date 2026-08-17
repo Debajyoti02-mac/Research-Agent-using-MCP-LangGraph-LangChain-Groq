@@ -6,8 +6,24 @@
 (() => {
     "use strict";
 
+    // ── Helper for safe UUID generation ──
+    function generateUUID() {
+        if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
+            try {
+                return crypto.randomUUID();
+            } catch (e) {
+                // fallback below
+            }
+        }
+        return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) => {
+            const r = (Math.random() * 16) | 0;
+            const v = c === "x" ? r : (r & 0x3) | 0x8;
+            return v.toString(16);
+        });
+    }
+
     // ── State ──
-    let threadId = crypto.randomUUID();
+    let threadId = generateUUID();
     let isProcessing = false;
     let pendingAttachment = null;
     let uploadPromise = null;
@@ -40,16 +56,22 @@
     const dragDropOverlay = $("#dragDropOverlay");
 
     // ── Markdown Setup ──
-    marked.setOptions({
-        highlight: (code, lang) => {
-            if (lang && hljs.getLanguage(lang)) {
-                return hljs.highlight(code, { language: lang }).value;
-            }
-            return hljs.highlightAuto(code).value;
-        },
-        breaks: true,
-        gfm: true,
-    });
+    if (typeof marked !== "undefined" && typeof marked.setOptions === "function") {
+        try {
+            marked.setOptions({
+                highlight: (code, lang) => {
+                    if (typeof hljs !== "undefined" && lang && hljs.getLanguage(lang)) {
+                        return hljs.highlight(code, { language: lang }).value;
+                    }
+                    return typeof hljs !== "undefined" ? hljs.highlightAuto(code).value : code;
+                },
+                breaks: true,
+                gfm: true,
+            });
+        } catch (e) {
+            console.warn("Marked setup warning:", e);
+        }
+    }
 
     // ── Tool Icon Map ──
     const toolIcons = {
@@ -414,7 +436,7 @@
     }
 
     function newChat() {
-        threadId = crypto.randomUUID();
+        threadId = generateUUID();
         removeAttachment();
 
         // Remove all messages
@@ -498,10 +520,12 @@
         }
     });
 
-    // Auto-resize textarea
-    userInput.addEventListener("input", () => {
-        autoResize();
-        updateSendBtn();
+    // Auto-resize textarea & update send button state
+    ["input", "keyup", "change"].forEach((evt) => {
+        userInput.addEventListener(evt, () => {
+            autoResize();
+            updateSendBtn();
+        });
     });
 
     // Sidebar toggle

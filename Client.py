@@ -20,11 +20,11 @@ async def main ():
     }
     })
 
-    LLM = ChatGroq(model="openai/gpt-oss-120b") 
+    LLM = ChatGroq(model="openai/gpt-oss-120b", temperature=0) 
     tool  = await client.get_tools() 
     if not tool:
         print("tools cant fetch by server now")
-    system_prompt = "YOU are a realiable ai assistent for This MCP server so do the work sufficiently one by one using tool"
+    system_prompt = "You are a reliable AI assistant for this MCP server. For mathematical calculations, use the calculator tool and reply ONLY with the final numerical answer directly."
     research_agent_create=create_react_agent(model=LLM , tools=tool , prompt=system_prompt,checkpointer=memory)
 
     config = {
