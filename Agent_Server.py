@@ -135,6 +135,46 @@ def _safe_eval_node(node):
     raise TypeError(f"Unsupported expression component: {type(node).__name__}")
 
 
+_SAFE_MATH_GLOBALS = {
+    "__builtins__": None,
+    "abs": abs,
+    "round": round,
+    "max": max,
+    "min": min,
+    "sum": sum,
+    "math": math,
+    "sqrt": math.sqrt,
+    "sin": math.sin,
+    "cos": math.cos,
+    "tan": math.tan,
+    "asin": math.asin,
+    "acos": math.acos,
+    "atan": math.atan,
+    "sinh": math.sinh,
+    "cosh": math.cosh,
+    "tanh": math.tanh,
+    "log": math.log,
+    "ln": math.log,
+    "log10": math.log10,
+    "log2": math.log2,
+    "exp": math.exp,
+    "ceil": math.ceil,
+    "floor": math.floor,
+    "pow": math.pow,
+    "factorial": math.factorial,
+    "comb": math.comb,
+    "perm": math.perm,
+    "gcd": math.gcd,
+    "lcm": math.lcm,
+    "degrees": math.degrees,
+    "radians": math.radians,
+    "hypot": math.hypot,
+    "pi": math.pi,
+    "e": math.e,
+    "tau": math.tau,
+}
+
+
 @mcp.tool()
 def calculator(expression: str = "", exec: str = "", expr: str = "", **kwargs):
     """Evaluate mathematical expressions safely. Accepts expressions like '256 * 48 + 1024', 'sqrt(144) + pi', 'factorial(5)'."""
@@ -151,8 +191,13 @@ def calculator(expression: str = "", exec: str = "", expr: str = "", **kwargs):
         # Remove digit grouping commas (e.g. 1,000 -> 1000)
         cleaned = re.sub(r'(?<=\d),(?=\d)', '', cleaned)
 
-        tree = ast.parse(cleaned, mode="eval")
-        res = _safe_eval_node(tree)
+        # Primary: AST safe evaluation
+        try:
+            tree = ast.parse(cleaned, mode="eval")
+            res = _safe_eval_node(tree)
+        except Exception:
+            # Fallback: Restricted safe eval without builtins
+            res = eval(cleaned, _SAFE_MATH_GLOBALS, {})
 
         if isinstance(res, float) and res.is_integer():
             return str(int(res))

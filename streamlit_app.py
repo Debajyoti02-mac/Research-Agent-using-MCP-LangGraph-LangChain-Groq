@@ -161,15 +161,17 @@ SYSTEM_PROMPT = (
 )
 
 
-@st.cache_resource
 def get_agent(api_key: str):
-    memory = MemorySaver()
-    return create_react_agent(
-        model=get_llm(groq_api_key=api_key),
-        tools=tools,
-        prompt=SYSTEM_PROMPT,
-        checkpointer=memory,
-    )
+    if "agent" not in st.session_state or st.session_state.get("cached_api_key") != api_key:
+        memory = MemorySaver()
+        st.session_state["agent"] = create_react_agent(
+            model=get_llm(groq_api_key=api_key),
+            tools=tools,
+            prompt=SYSTEM_PROMPT,
+            checkpointer=memory,
+        )
+        st.session_state["cached_api_key"] = api_key
+    return st.session_state["agent"]
 
 
 # ──────────────────────────────────────────────
