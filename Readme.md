@@ -359,17 +359,24 @@ Final Answer
 
 ---
 
-# Future Improvements
+# How to Run
 
-- Source Citations
-- Persistent SQLite Memory
-- Cross Encoder Reranker
-- Multi Query Retrieval
-- Reflection Agent
-- Multi Agent Workflow
-- Human In The Loop
-- Document Upload Tool
-- Research Report Generator
+### 1. Activate Environment
+```bash
+source .venv/bin/activate
+```
+
+### 2. Run Streamlit UI (Recommended)
+```bash
+streamlit run streamlit_app.py
+```
+Open **http://localhost:8501** in your browser.
+
+### 3. Run FastAPI Backend
+```bash
+uvicorn app:app --host 0.0.0.0 --port 8000 --reload
+```
+Open **http://localhost:8000** in your browser.
 
 ---
 

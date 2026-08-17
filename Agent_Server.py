@@ -179,20 +179,25 @@ def weather(location: str):
 
 @mcp.tool()
 def file_read(filename: str):
-    """Read a file."""
-
+    """Read content from a local file. Example: 'notes.txt', 'root.txt'."""
     try:
-        with open(
-            filename,
-            "r",
-            encoding="utf-8",
-            errors="ignore"
-        ) as f:
+        clean_name = str(filename).strip().strip("\"'")
+        if not os.path.exists(clean_name):
+            return f"Error: File '{clean_name}' not found on filesystem."
 
-            return f.read()
+        with open(clean_name, "r", encoding="utf-8", errors="ignore") as f:
+            content = f.read()
+
+        return content
 
     except Exception as e:
-        return str(e)
+        return f"Error reading file '{filename}': {str(e)}"
+
+
+@mcp.tool()
+def read_file(filename: str):
+    """Read content from a local file. Example: 'notes.txt', 'root.txt'."""
+    return file_read(filename)
 
 
 # =====================================
@@ -201,25 +206,31 @@ def file_read(filename: str):
 
 @mcp.tool()
 def write_file(filename: str, content: str):
-    """Write content to file."""
-
+    """Create or update a local file with the provided text content. Example: 'notes.txt'."""
     try:
+        clean_name = str(filename).strip().strip("\"'")
 
-        if len(content) > 5000:
-            return "Content too large."
+        if len(content) > 100000:
+            return f"Error: Content too large ({len(content)} chars, max allowed is 100,000 chars)."
 
-        with open(
-            filename,
-            "w",
-            encoding="utf-8"
-        ) as f:
+        parent_dir = os.path.dirname(clean_name)
+        if parent_dir and not os.path.exists(parent_dir):
+            os.makedirs(parent_dir, exist_ok=True)
 
+        with open(clean_name, "w", encoding="utf-8") as f:
             f.write(content)
 
-        return "File saved successfully."
+        lines_count = len(content.splitlines())
+        return f"File '{clean_name}' saved successfully ({len(content)} characters, {lines_count} lines)."
 
     except Exception as e:
-        return str(e)
+        return f"Error writing to file '{filename}': {str(e)}"
+
+
+@mcp.tool()
+def file_write(filename: str, content: str):
+    """Create or update a local file with the provided text content. Example: 'notes.txt'."""
+    return write_file(filename, content)
 
 
 # =====================================

@@ -74,7 +74,9 @@ tools = [
     StructuredTool.from_function(func=_calculator, name="calculator", description=_calculator.__doc__),
     StructuredTool.from_function(func=_weather, name="weather", description=_weather.__doc__),
     StructuredTool.from_function(func=_file_read, name="file_read", description=_file_read.__doc__),
+    StructuredTool.from_function(func=_file_read, name="read_file", description="Reads the text content of a local file on the filesystem. Example: 'notes.txt'"),
     StructuredTool.from_function(func=_write_file, name="write_file", description=_write_file.__doc__),
+    StructuredTool.from_function(func=_write_file, name="file_write", description="Creates or updates a local file on the filesystem with the provided text content."),
     StructuredTool.from_function(func=_hybrid_rag, name="Hybrid_Rag", description=_hybrid_rag.__doc__),
     StructuredTool.from_function(func=_research_tool, name="Research_tool", description=_research_tool.__doc__),
 ]
@@ -218,6 +220,37 @@ async def chat(req: ChatRequest):
         )
 
     except Exception as e:
+        # Attempt recovery if Groq failed on tool JSON parsing
+        import json
+        try:
+            error_str = str(e)
+            match = re.search(r"'failed_generation':\s*'(.*?)'\s*\}\s*\}", error_str, re.DOTALL)
+            if not match:
+                match = re.search(r'(\{"name":\s*"write_file".*?\})', error_str, re.DOTALL)
+
+            if match:
+                raw_payload = match.group(1).replace("\\'", "'")
+                sanitized = re.sub(r'\\(?![/"\\bfnrtu])', r'\\\\', raw_payload)
+                parsed = json.loads(sanitized)
+
+                tool_name = parsed.get("name")
+                args = parsed.get("arguments", {})
+                if isinstance(args, str):
+                    args = json.loads(re.sub(r'\\(?![/"\\bfnrtu])', r'\\\\', args))
+
+                if tool_name == "write_file":
+                    res = write_file(args.get("filename", "output.txt"), args.get("content", ""))
+                    return ChatResponse(response=res, thread_id=thread_id, tools_used=["write_file"])
+                elif tool_name == "file_read":
+                    res = file_read(args.get("filename", ""))
+                    return ChatResponse(response=res, thread_id=thread_id, tools_used=["file_read"])
+                elif tool_name == "calculator":
+                    expr = args.get("expression") or args.get("exec") or ""
+                    res = calculator(expr)
+                    return ChatResponse(response=res, thread_id=thread_id, tools_used=["calculator"])
+        except Exception:
+            pass
+
         raise HTTPException(status_code=500, detail=str(e))
 
 

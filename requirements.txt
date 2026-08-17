@@ -16,3 +16,4 @@ langchain-mcp-adapters
 requests
 fastapi
 uvicorn[standard]
+streamlit
