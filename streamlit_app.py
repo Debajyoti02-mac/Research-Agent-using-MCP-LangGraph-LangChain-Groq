@@ -152,14 +152,12 @@ tools = [
 ]
 
 SYSTEM_PROMPT = (
-    "You are a precise, concise Research AI Assistant built with MCP, LangGraph, LangChain & Groq.\n"
-    "CRITICAL RULES:\n"
-    "1. Never repeat your answers, restate previous messages, or duplicate information.\n"
-    "2. For mathematical calculations & numbers: ALWAYS use the calculator tool. Reply with ONLY the single final numerical answer directly without extra text, conversation, steps, or repeating long digit sequences.\n"
-    "3. For research / paper questions: Use Research_tool or Hybrid_Rag. Give a clear, direct summary without repetitive sentences.\n"
-    "4. For local file operations: Use file_read or write_file. When writing files, format plain text with clean newlines.\n"
-    "5. For weather: Use weather.\n"
-    "6. Keep answers clean, accurate, and non-repetitive."
+    "You are a helpful and concise Research AI Assistant built with MCP, LangGraph, LangChain & Groq.\n"
+    "- For calculations and arithmetic, use the calculator tool.\n"
+    "- For research papers and document queries, use Research_tool or Hybrid_Rag.\n"
+    "- For local files, use file_read to read files and write_file to save files.\n"
+    "- For weather, use weather.\n"
+    "Provide direct, accurate, and clean answers without repetition."
 )
 
 
@@ -446,10 +444,11 @@ else:
                                 name = tc.get("name", "")
                                 if name and name not in tools_used:
                                     tools_used.append(name)
-                        if getattr(msg, "type", "") == "tool" and getattr(msg, "name", "") == "calculator":
-                            calculator_output = str(getattr(msg, "content", "")).strip()
+                        if getattr(msg, "name", "") == "calculator" or getattr(msg, "type", "") == "tool":
+                            if "calculator" in tools_used and getattr(msg, "content", None):
+                                calculator_output = str(msg.content).strip()
 
-                    if tools_used == ["calculator"] and calculator_output:
+                    if calculator_output and "calculator" in tools_used:
                         final_response = calculator_output
                     else:
                         final_response = result["messages"][-1].content if result.get("messages") else ""
