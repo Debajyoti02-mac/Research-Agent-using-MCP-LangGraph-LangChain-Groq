@@ -280,7 +280,6 @@ def get_llm(groq_api_key: str = None):
 # =====================================
 
 def initialize_rag():
-
     global collection
 
     if collection is not None:
@@ -288,25 +287,37 @@ def initialize_rag():
 
     import chromadb
 
-    from chromadb.utils.embedding_functions import (
-        CohereEmbeddingFunction
-    )
-
-    embedding_function = (
-        CohereEmbeddingFunction(
-            api_key=os.getenv('COHERE_API_KEY'),
-            model_name="embed-english-v3.0"
+    cohere_key = os.getenv("COHERE_API_KEY")
+    if cohere_key:
+        try:
+            from chromadb.utils.embedding_functions import CohereEmbeddingFunction
+            embedding_function = CohereEmbeddingFunction(
+                api_key=cohere_key,
+                model_name="embed-english-v3.0",
+            )
+        except Exception:
+            from chromadb.utils.embedding_functions import SentenceTransformerEmbeddingFunction
+            embedding_function = SentenceTransformerEmbeddingFunction(
+                model_name="all-MiniLM-L6-v2"
+            )
+    else:
+        from chromadb.utils.embedding_functions import SentenceTransformerEmbeddingFunction
+        embedding_function = SentenceTransformerEmbeddingFunction(
+            model_name="all-MiniLM-L6-v2"
         )
-    )
 
-    client = chromadb.PersistentClient(
-        path="./Research_Agent"
-    )
+    client = chromadb.PersistentClient(path="./Research_Agent")
 
-    collection = client.get_collection(
-        name="Agent",
-        embedding_function=embedding_function
-    )
+    try:
+        collection = client.get_collection(
+            name="Agent",
+            embedding_function=embedding_function,
+        )
+    except Exception:
+        collection = client.get_or_create_collection(
+            name="Agent",
+            embedding_function=embedding_function,
+        )
 
     print("Existing Chroma loaded.")
 
