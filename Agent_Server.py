@@ -232,16 +232,51 @@ def weather(location: str):
 
 @mcp.tool()
 def file_read(filename: str):
-    """Read content from a local file. Example: 'notes.txt', 'root.txt'."""
+    """Read content from a local file or PDF document. Example: 'notes.txt', 'cv.pdf', 'paper.pdf'."""
     try:
         clean_name = str(filename).strip().strip("\"'")
-        if not os.path.exists(clean_name):
-            return f"Error: File '{clean_name}' not found on filesystem."
+        possible_paths = [
+            clean_name,
+            os.path.join("uploads", clean_name),
+            os.path.join("uploads", os.path.basename(clean_name)),
+            os.path.basename(clean_name),
+        ]
 
-        with open(clean_name, "r", encoding="utf-8", errors="ignore") as f:
-            content = f.read()
+        found_path = None
+        for p in possible_paths:
+            if os.path.exists(p) and os.path.isfile(p):
+                found_path = p
+                break
 
-        return content
+        if found_path:
+            if found_path.lower().endswith(".pdf"):
+                import pypdf
+                reader = pypdf.PdfReader(found_path)
+                text = ""
+                for idx, page in enumerate(reader.pages):
+                    page_text = page.extract_text() or ""
+                    text += f"\n--- Page {idx + 1} ---\n" + page_text
+                return text.strip() if text.strip() else "PDF loaded, but no readable text found."
+            else:
+                with open(found_path, "r", encoding="utf-8", errors="ignore") as f:
+                    return f.read()
+
+        # If not found on local disk, check if it was indexed in ChromaDB vector store
+        initialize_rag()
+        if collection is not None and collection.count() > 0:
+            query_res = collection.get(where={"source": os.path.basename(clean_name)})
+            docs = query_res.get("documents", [])
+            if docs:
+                return "\n\n---\n\n".join(docs)
+            # If exact where clause didn't match, do a search with Hybrid_Rag
+            rag_res = Hybrid_Rag(clean_name)
+            if rag_res and "No matching" not in rag_res and "No indexed" not in rag_res:
+                return rag_res
+
+        return f"Error: File '{clean_name}' not found on filesystem or knowledge base."
+
+    except Exception as e:
+        return f"Error reading file '{filename}': {str(e)}"
 
     except Exception as e:
         return f"Error reading file '{filename}': {str(e)}"

@@ -153,8 +153,8 @@ tools = [
 
 SYSTEM_PROMPT = (
     "You are a helpful and concise Research AI Assistant built with MCP, LangGraph, LangChain & Groq.\n"
-    "- For calculations and arithmetic: ALWAYS use the calculator tool. Reply with ONLY the final numerical answer directly (e.g. 105) without equations, formulas, LaTeX, steps, or conversation.\n"
-    "- For research papers and document queries: use Research_tool or Hybrid_Rag.\n"
+    "- For calculations and arithmetic: ALWAYS use the calculator tool. Reply with ONLY the final numerical answer directly without equations, formulas, LaTeX, steps, or conversation.\n"
+    "- For uploaded documents, PDFs, or research questions: use file_read or Hybrid_Rag to read and analyze document content.\n"
     "- For local files: use file_read to read files and write_file to save files.\n"
     "- For weather: use weather.\n"
     "Provide direct, accurate, and clean answers without repetition."
@@ -335,6 +335,12 @@ with st.sidebar:
                         filename = uploaded_file.name
                         suffix = os.path.splitext(filename)[1].lower()
                         contents = uploaded_file.read()
+
+                        # Save copy to uploads/ directory for direct file_read tool access
+                        os.makedirs("uploads", exist_ok=True)
+                        save_path = os.path.join("uploads", filename)
+                        with open(save_path, "wb") as sf:
+                            sf.write(contents)
 
                         with tempfile.NamedTemporaryFile(delete=False, suffix=suffix) as tmp:
                             tmp.write(contents)
