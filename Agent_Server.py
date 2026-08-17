@@ -256,15 +256,20 @@ LLM = None
 # Lazy LLM
 # =====================================
 
-def get_llm():
+def get_llm(groq_api_key: str = None):
     global LLM
 
-    if LLM is None:
+    key = groq_api_key or os.getenv("GROQ_API_KEY")
+    if not key:
+        raise ValueError("GROQ_API_KEY is not set. Please set the GROQ_API_KEY environment variable or enter it in the app.")
+
+    if LLM is None or groq_api_key:
         from langchain_groq import ChatGroq
 
         LLM = ChatGroq(
             model="openai/gpt-oss-120b",
             temperature=0,
+            groq_api_key=key,
         )
 
     return LLM

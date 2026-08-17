@@ -164,17 +164,14 @@ SYSTEM_PROMPT = (
 
 
 @st.cache_resource
-def get_agent():
+def get_agent(api_key: str):
     memory = MemorySaver()
     return create_react_agent(
-        model=get_llm(),
+        model=get_llm(groq_api_key=api_key),
         tools=tools,
         prompt=SYSTEM_PROMPT,
         checkpointer=memory,
     )
-
-
-agent = get_agent()
 
 
 # ──────────────────────────────────────────────
@@ -272,6 +269,11 @@ if "messages" not in st.session_state:
 # Sidebar: Document Management & Config
 # ──────────────────────────────────────────────
 
+groq_key = os.getenv("GROQ_API_KEY")
+if not groq_key and hasattr(st, "secrets") and "GROQ_API_KEY" in st.secrets:
+    groq_key = st.secrets["GROQ_API_KEY"]
+    os.environ["GROQ_API_KEY"] = groq_key
+
 with st.sidebar:
     st.markdown("### 🔬 Research Agent")
     st.markdown(
@@ -283,6 +285,20 @@ with st.sidebar:
         - **Hybrid RAG** (ChromaDB + BM25)
         """
     )
+    st.divider()
+
+    st.markdown("### 🔑 API Configuration")
+    user_api_key = st.text_input(
+        "Groq API Key",
+        value=groq_key or "",
+        type="password",
+        placeholder="gsk_...",
+        help="Get your free API key at https://console.groq.com/keys",
+    )
+    if user_api_key:
+        groq_key = user_api_key
+        os.environ["GROQ_API_KEY"] = user_api_key
+
     st.divider()
 
     st.markdown("### 📄 Document Knowledge Base")
@@ -357,114 +373,120 @@ with st.sidebar:
 st.markdown('<div class="main-title">Research Agent</div>', unsafe_allow_html=True)
 st.markdown('<div class="sub-title">Ask research questions, run math calculations, query documents, and manage files.</div>', unsafe_allow_html=True)
 
-# Suggestion Chips if no messages yet
-if not st.session_state.messages:
-    st.markdown("##### 💡 Suggested Questions")
-    col1, col2 = st.columns(2)
-    with col1:
-        if st.button("📄 What is Retrieval Augmented Generation?", use_container_width=True):
-            st.session_state.messages.append({"role": "user", "content": "What is Retrieval Augmented Generation?", "tools": []})
-            st.rerun()
-        if st.button("🧮 Calculate 256 * 48 + 1024", use_container_width=True):
-            st.session_state.messages.append({"role": "user", "content": "Calculate 256 * 48 + 1024", "tools": []})
-            st.rerun()
-    with col2:
-        if st.button("🔬 Explain the RAG pipeline architecture", use_container_width=True):
-            st.session_state.messages.append({"role": "user", "content": "Explain the RAG pipeline architecture", "tools": []})
-            st.rerun()
-        if st.button("🌤️ What is the weather in Ranchi?", use_container_width=True):
-            st.session_state.messages.append({"role": "user", "content": "What is the weather in Ranchi?", "tools": []})
-            st.rerun()
+if not groq_key:
+    st.warning("⚠️ **Groq API Key Required**: Please enter your Groq API Key in the sidebar (or add `GROQ_API_KEY` to your Streamlit Cloud Secrets) to activate the Research Agent.")
+    st.info("Don't have an API key? Get one for free in 30 seconds at [console.groq.com/keys](https://console.groq.com/keys).")
+else:
+    agent = get_agent(groq_key)
 
-# Display chat history
-for msg in st.session_state.messages:
-    with st.chat_message(msg["role"]):
-        st.markdown(msg["content"])
-        if msg.get("tools"):
-            badges_html = "".join(
-                [f'<span class="tool-badge">{TOOL_ICONS.get(t, "⚙️")} {t}</span>' for t in msg["tools"]]
-            )
-            st.markdown(f"<div>{badges_html}</div>", unsafe_allow_html=True)
+    # Suggestion Chips if no messages yet
+    if not st.session_state.messages:
+        st.markdown("##### 💡 Suggested Questions")
+        col1, col2 = st.columns(2)
+        with col1:
+            if st.button("📄 What is Retrieval Augmented Generation?", use_container_width=True):
+                st.session_state.messages.append({"role": "user", "content": "What is Retrieval Augmented Generation?", "tools": []})
+                st.rerun()
+            if st.button("🧮 Calculate 256 * 48 + 1024", use_container_width=True):
+                st.session_state.messages.append({"role": "user", "content": "Calculate 256 * 48 + 1024", "tools": []})
+                st.rerun()
+        with col2:
+            if st.button("🔬 Explain the RAG pipeline architecture", use_container_width=True):
+                st.session_state.messages.append({"role": "user", "content": "Explain the RAG pipeline architecture", "tools": []})
+                st.rerun()
+            if st.button("🌤️ What is the weather in Ranchi?", use_container_width=True):
+                st.session_state.messages.append({"role": "user", "content": "What is the weather in Ranchi?", "tools": []})
+                st.rerun()
 
-# User input box
-user_input = st.chat_input("Ask a question about your research or enter a calculation…")
-
-# Check if last message needs AI response (e.g. from suggestion buttons or chat input)
-pending_prompt = None
-if user_input:
-    st.session_state.messages.append({"role": "user", "content": user_input, "tools": []})
-    st.rerun()
-
-if st.session_state.messages and st.session_state.messages[-1]["role"] == "user":
-    pending_prompt = st.session_state.messages[-1]["content"]
-
-if pending_prompt:
-    with st.chat_message("assistant"):
-        with st.spinner("Thinking & processing tools..."):
-            config = {"configurable": {"thread_id": st.session_state.thread_id}}
-            try:
-                result = agent.invoke(
-                    {"messages": [("user", pending_prompt)]},
-                    config=config,
+    # Display chat history
+    for msg in st.session_state.messages:
+        with st.chat_message(msg["role"]):
+            st.markdown(msg["content"])
+            if msg.get("tools"):
+                badges_html = "".join(
+                    [f'<span class="tool-badge">{TOOL_ICONS.get(t, "⚙️")} {t}</span>' for t in msg["tools"]]
                 )
+                st.markdown(f"<div>{badges_html}</div>", unsafe_allow_html=True)
 
-                messages = result.get("messages", [])
-                tools_used = []
-                calculator_output = None
-                last_user_idx = 0
+    # User input box
+    user_input = st.chat_input("Ask a question about your research or enter a calculation…")
 
-                for idx, msg in enumerate(messages):
-                    msg_type = getattr(msg, "type", "")
-                    if msg_type in ("human", "user") or (isinstance(msg, tuple) and msg[0] == "user"):
-                        last_user_idx = idx
+    # Check if last message needs AI response (e.g. from suggestion buttons or chat input)
+    pending_prompt = None
+    if user_input:
+        st.session_state.messages.append({"role": "user", "content": user_input, "tools": []})
+        st.rerun()
 
-                for msg in messages[last_user_idx:]:
-                    if hasattr(msg, "tool_calls") and msg.tool_calls:
-                        for tc in msg.tool_calls:
-                            name = tc.get("name", "")
-                            if name and name not in tools_used:
-                                tools_used.append(name)
-                    if getattr(msg, "type", "") == "tool" and getattr(msg, "name", "") == "calculator":
-                        calculator_output = str(getattr(msg, "content", "")).strip()
+    if st.session_state.messages and st.session_state.messages[-1]["role"] == "user":
+        pending_prompt = st.session_state.messages[-1]["content"]
 
-                if tools_used == ["calculator"] and calculator_output:
-                    final_response = calculator_output
-                else:
-                    final_response = result["messages"][-1].content if result.get("messages") else ""
-
-                final_response = clean_and_deduplicate(final_response)
-
-                st.markdown(final_response)
-                if tools_used:
-                    badges_html = "".join(
-                        [f'<span class="tool-badge">{TOOL_ICONS.get(t, "⚙️")} {t}</span>' for t in tools_used]
+    if pending_prompt:
+        with st.chat_message("assistant"):
+            with st.spinner("Thinking & processing tools..."):
+                config = {"configurable": {"thread_id": st.session_state.thread_id}}
+                try:
+                    result = agent.invoke(
+                        {"messages": [("user", pending_prompt)]},
+                        config=config,
                     )
-                    st.markdown(f"<div>{badges_html}</div>", unsafe_allow_html=True)
 
-                st.session_state.messages.append(
-                    {
-                        "role": "assistant",
-                        "content": final_response,
-                        "tools": tools_used,
-                    }
-                )
+                    messages = result.get("messages", [])
+                    tools_used = []
+                    calculator_output = None
+                    last_user_idx = 0
 
-            except Exception as e:
-                # Attempt recovery if Groq failed on tool JSON parsing
-                recovered_resp, recovered_tools = handle_tool_recovery(str(e))
-                if recovered_resp:
-                    st.markdown(recovered_resp)
-                    if recovered_tools:
+                    for idx, msg in enumerate(messages):
+                        msg_type = getattr(msg, "type", "")
+                        if msg_type in ("human", "user") or (isinstance(msg, tuple) and msg[0] == "user"):
+                            last_user_idx = idx
+
+                    for msg in messages[last_user_idx:]:
+                        if hasattr(msg, "tool_calls") and msg.tool_calls:
+                            for tc in msg.tool_calls:
+                                name = tc.get("name", "")
+                                if name and name not in tools_used:
+                                    tools_used.append(name)
+                        if getattr(msg, "type", "") == "tool" and getattr(msg, "name", "") == "calculator":
+                            calculator_output = str(getattr(msg, "content", "")).strip()
+
+                    if tools_used == ["calculator"] and calculator_output:
+                        final_response = calculator_output
+                    else:
+                        final_response = result["messages"][-1].content if result.get("messages") else ""
+
+                    final_response = clean_and_deduplicate(final_response)
+
+                    st.markdown(final_response)
+                    if tools_used:
                         badges_html = "".join(
-                            [f'<span class="tool-badge">{TOOL_ICONS.get(t, "⚙️")} {t}</span>' for t in recovered_tools]
+                            [f'<span class="tool-badge">{TOOL_ICONS.get(t, "⚙️")} {t}</span>' for t in tools_used]
                         )
                         st.markdown(f"<div>{badges_html}</div>", unsafe_allow_html=True)
+
                     st.session_state.messages.append(
                         {
                             "role": "assistant",
-                            "content": recovered_resp,
-                            "tools": recovered_tools,
+                            "content": final_response,
+                            "tools": tools_used,
                         }
                     )
-                else:
-                    st.error(f"Error generating response: {e}")
+
+                except Exception as e:
+                    # Attempt recovery if Groq failed on tool JSON parsing
+                    recovered_resp, recovered_tools = handle_tool_recovery(str(e))
+                    if recovered_resp:
+                        st.markdown(recovered_resp)
+                        if recovered_tools:
+                            badges_html = "".join(
+                                [f'<span class="tool-badge">{TOOL_ICONS.get(t, "⚙️")} {t}</span>' for t in recovered_tools]
+                            )
+                            st.markdown(f"<div>{badges_html}</div>", unsafe_allow_html=True)
+                        st.session_state.messages.append(
+                            {
+                                "role": "assistant",
+                                "content": recovered_resp,
+                                "tools": recovered_tools,
+                            }
+                        )
+                    else:
+                        st.error(f"Error generating response: {e}")
