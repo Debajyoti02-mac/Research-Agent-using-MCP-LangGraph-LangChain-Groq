@@ -89,9 +89,6 @@ def _safe_eval_node(node):
     elif isinstance(node, ast.Constant):
         return node.value
 
-    elif isinstance(node, (ast.Num, ast.Str)):
-        return node.n if hasattr(node, "n") else node.s
-
     elif isinstance(node, ast.BinOp):
         left = _safe_eval_node(node.left)
         right = _safe_eval_node(node.right)
