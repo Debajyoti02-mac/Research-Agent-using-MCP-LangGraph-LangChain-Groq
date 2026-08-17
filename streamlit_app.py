@@ -14,6 +14,15 @@ import streamlit as st
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 warnings.filterwarnings("ignore")
 
+# Sync Streamlit Cloud secrets to os.environ if available
+try:
+    if hasattr(st, "secrets"):
+        for key, val in st.secrets.items():
+            if isinstance(val, str):
+                os.environ.setdefault(key, val)
+except Exception:
+    pass
+
 from langchain_core.tools import StructuredTool
 from langgraph.prebuilt import create_react_agent
 from langgraph.checkpoint.memory import MemorySaver

@@ -1,6 +1,17 @@
-from mcp.server.fastmcp import FastMCP
+try:
+    from mcp.server.fastmcp import FastMCP
+    mcp = FastMCP("Research_Agent")
+except Exception:
+    class DummyMCP:
+        def tool(self, *args, **kwargs):
+            def decorator(f):
+                return f
+            return decorator
 
-mcp = FastMCP("Research_Agent")
+        def run(self, *args, **kwargs):
+            pass
+
+    mcp = DummyMCP()
 
 import ast
 import operator
