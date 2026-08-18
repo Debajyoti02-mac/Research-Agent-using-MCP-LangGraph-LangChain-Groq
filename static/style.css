@@ -4,22 +4,23 @@
    ═══════════════════════════════════════════════ */
 
 /* ── CSS Custom Properties ── */
-:root {
+/* ── CSS Custom Properties ── */
+:root, [data-theme="cosmic"] {
     /* Backgrounds */
     --bg-base: #06060f;
-    --bg-surface: rgba(12, 12, 28, 0.7);
-    --bg-elevated: rgba(20, 20, 45, 0.55);
+    --bg-surface: rgba(12, 12, 28, 0.75);
+    --bg-elevated: rgba(20, 20, 45, 0.6);
 
     /* Glass */
-    --glass-bg: rgba(255, 255, 255, 0.035);
-    --glass-bg-hover: rgba(255, 255, 255, 0.06);
-    --glass-border: rgba(255, 255, 255, 0.07);
-    --glass-border-hover: rgba(255, 255, 255, 0.14);
+    --glass-bg: rgba(255, 255, 255, 0.04);
+    --glass-bg-hover: rgba(255, 255, 255, 0.07);
+    --glass-border: rgba(255, 255, 255, 0.08);
+    --glass-border-hover: rgba(255, 255, 255, 0.16);
 
     /* Text */
-    --text-primary: #e4e6ef;
-    --text-secondary: #8b90b0;
-    --text-muted: #505472;
+    --text-primary: #f1f3f9;
+    --text-secondary: #9499b7;
+    --text-muted: #575c7e;
 
     /* Accents */
     --accent-purple: #8b5cf6;
@@ -32,15 +33,15 @@
 
     /* Messages */
     --user-gradient: linear-gradient(135deg, #7c3aed 0%, #2563eb 100%);
-    --agent-bg: rgba(255, 255, 255, 0.03);
-    --agent-border: rgba(255, 255, 255, 0.06);
+    --agent-bg: rgba(255, 255, 255, 0.035);
+    --agent-border: rgba(255, 255, 255, 0.07);
 
     /* Shadows */
     --shadow-sm: 0 1px 4px rgba(0, 0, 0, 0.4);
     --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.45);
     --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.55);
-    --shadow-glow-purple: 0 0 24px rgba(139, 92, 246, 0.12);
-    --shadow-glow-cyan: 0 0 24px rgba(34, 211, 238, 0.10);
+    --shadow-glow-purple: 0 0 24px rgba(139, 92, 246, 0.15);
+    --shadow-glow-cyan: 0 0 24px rgba(34, 211, 238, 0.12);
 
     /* Radii */
     --r-sm: 8px;
@@ -65,6 +66,89 @@
     --t-base: 250ms var(--ease);
     --t-slow: 400ms var(--ease);
     --t-spring: 500ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* ── Cyberpunk Emerald Theme ── */
+[data-theme="cyberpunk"] {
+    --bg-base: #04120e;
+    --bg-surface: rgba(6, 26, 20, 0.8);
+    --bg-elevated: rgba(10, 42, 32, 0.65);
+    --glass-bg: rgba(16, 185, 129, 0.05);
+    --glass-bg-hover: rgba(16, 185, 129, 0.1);
+    --glass-border: rgba(16, 185, 129, 0.18);
+    --glass-border-hover: rgba(16, 185, 129, 0.35);
+    --text-primary: #e6fff4;
+    --text-secondary: #7ee7c0;
+    --text-muted: #3b7e65;
+    --accent-purple: #10b981;
+    --accent-blue: #06b6d4;
+    --accent-cyan: #00f5a0;
+    --user-gradient: linear-gradient(135deg, #059669 0%, #0d9488 100%);
+    --agent-bg: rgba(6, 40, 30, 0.5);
+    --agent-border: rgba(16, 185, 129, 0.2);
+}
+
+/* ── Obsidian Slate Theme ── */
+[data-theme="obsidian"] {
+    --bg-base: #090a0f;
+    --bg-surface: rgba(15, 18, 26, 0.85);
+    --bg-elevated: rgba(24, 29, 42, 0.7);
+    --glass-bg: rgba(255, 255, 255, 0.03);
+    --glass-bg-hover: rgba(255, 255, 255, 0.06);
+    --glass-border: rgba(255, 255, 255, 0.06);
+    --glass-border-hover: rgba(255, 255, 255, 0.12);
+    --text-primary: #f8fafc;
+    --text-secondary: #94a3b8;
+    --text-muted: #475569;
+    --accent-purple: #6366f1;
+    --accent-blue: #38bdf8;
+    --accent-cyan: #0284c7;
+    --user-gradient: linear-gradient(135deg, #334155 0%, #1e293b 100%);
+    --agent-bg: rgba(18, 22, 34, 0.6);
+    --agent-border: rgba(255, 255, 255, 0.06);
+}
+
+/* ── Sunset Crimson Theme ── */
+[data-theme="sunset"] {
+    --bg-base: #12060b;
+    --bg-surface: rgba(30, 10, 18, 0.8);
+    --bg-elevated: rgba(48, 16, 30, 0.65);
+    --glass-bg: rgba(244, 63, 94, 0.04);
+    --glass-bg-hover: rgba(244, 63, 94, 0.08);
+    --glass-border: rgba(244, 63, 94, 0.15);
+    --glass-border-hover: rgba(244, 63, 94, 0.3);
+    --text-primary: #fff1f2;
+    --text-secondary: #f43f5e;
+    --text-muted: #881337;
+    --accent-purple: #f43f5e;
+    --accent-blue: #fb7185;
+    --accent-cyan: #fb923c;
+    --user-gradient: linear-gradient(135deg, #e11d48 0%, #ea580c 100%);
+    --agent-bg: rgba(38, 12, 24, 0.5);
+    --agent-border: rgba(244, 63, 94, 0.18);
+}
+
+/* ── Studio Light Theme ── */
+[data-theme="studio-light"] {
+    --bg-base: #f8fafc;
+    --bg-surface: rgba(255, 255, 255, 0.85);
+    --bg-elevated: rgba(241, 245, 249, 0.9);
+    --glass-bg: rgba(255, 255, 255, 0.7);
+    --glass-bg-hover: rgba(255, 255, 255, 0.95);
+    --glass-border: rgba(203, 213, 225, 0.6);
+    --glass-border-hover: rgba(148, 163, 184, 0.8);
+    --text-primary: #0f172a;
+    --text-secondary: #475569;
+    --text-muted: #94a3b8;
+    --accent-purple: #7c3aed;
+    --accent-blue: #2563eb;
+    --accent-cyan: #0284c7;
+    --user-gradient: linear-gradient(135deg, #4f46e5 0%, #2563eb 100%);
+    --agent-bg: #ffffff;
+    --agent-border: rgba(203, 213, 225, 0.8);
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
+    --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.1);
 }
 
 
@@ -483,6 +567,78 @@ ul { list-style: none; }
     display: flex;
     align-items: center;
     gap: 12px;
+}
+
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* Theme selector dropdown */
+.theme-selector-wrapper {
+    position: relative;
+}
+
+.theme-dropdown {
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    width: 180px;
+    background: var(--bg-surface);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--r-md);
+    padding: 6px;
+    box-shadow: var(--shadow-lg);
+    z-index: 100;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    animation: fadeInScale 0.15s ease;
+}
+
+.theme-dropdown[hidden] {
+    display: none !important;
+}
+
+@keyframes fadeInScale {
+    from { opacity: 0; transform: scale(0.95) translateY(-4px); }
+    to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.theme-option {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px;
+    border-radius: var(--r-sm);
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+    transition: all var(--t-fast);
+    width: 100%;
+    text-align: left;
+}
+
+.theme-option:hover {
+    background: var(--glass-bg-hover);
+    color: var(--text-primary);
+}
+
+.theme-option.active {
+    background: var(--glass-bg-hover);
+    color: var(--accent-cyan);
+    font-weight: 600;
+}
+
+.theme-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .header-center h2 {

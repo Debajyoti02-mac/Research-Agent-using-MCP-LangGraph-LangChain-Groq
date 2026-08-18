@@ -227,6 +227,7 @@ def weather(location: str):
 
 
 # =====================================
+# =====================================
 # File Read
 # =====================================
 
@@ -248,10 +249,20 @@ def _find_file_case_insensitive(filename: str, search_dirs=("uploads", ".")):
 
 
 @mcp.tool()
-def file_read(filename: str):
+def file_read(filename: str = "", file_path: str = "", path: str = "", **kwargs):
     """Read content from a local file or PDF document. Example: 'notes.txt', 'cv.pdf', 'paper.pdf'."""
     try:
-        clean_name = str(filename).strip().strip("\"'")
+        raw_name = filename or file_path or path or kwargs.get("name") or kwargs.get("filepath") or (list(kwargs.values())[0] if kwargs else "")
+        clean_name = str(raw_name).strip().strip("\"'")
+
+        if not clean_name:
+            # Check if there is a file in uploads directory to default to
+            if os.path.exists("uploads") and os.path.isdir("uploads"):
+                files = [f for f in os.listdir("uploads") if not f.startswith(".")]
+                if files:
+                    clean_name = files[0]
+            if not clean_name:
+                return "Error: No filename provided to read."
 
         found_path = None
         if os.path.exists(clean_name) and os.path.isfile(clean_name):
@@ -294,9 +305,9 @@ def file_read(filename: str):
 
 
 @mcp.tool()
-def read_file(filename: str):
+def read_file(filename: str = "", file_path: str = "", path: str = "", **kwargs):
     """Read content from a local file. Example: 'notes.txt', 'root.txt'."""
-    return file_read(filename)
+    return file_read(filename=filename, file_path=file_path, path=path, **kwargs)
 
 
 # =====================================
@@ -304,32 +315,41 @@ def read_file(filename: str):
 # =====================================
 
 @mcp.tool()
-def write_file(filename: str, content: str):
+def write_file(filename: str = "", content: str = "", file_path: str = "", text: str = "", **kwargs):
     """Create or update a local file with the provided text content. Example: 'notes.txt'."""
     try:
-        clean_name = str(filename).strip().strip("\"'")
+        fname = filename or file_path or kwargs.get("path") or kwargs.get("name") or "output.txt"
+        cnt = content or text or kwargs.get("data") or kwargs.get("body") or ""
+        clean_name = str(fname).strip().strip("\"'")
 
-        if len(content) > 100000:
-            return f"Error: Content too large ({len(content)} chars, max allowed is 100,000 chars)."
+        if len(cnt) > 100000:
+            return f"Error: Content too large ({len(cnt)} chars, max allowed is 100,000 chars)."
 
         parent_dir = os.path.dirname(clean_name)
         if parent_dir and not os.path.exists(parent_dir):
             os.makedirs(parent_dir, exist_ok=True)
 
         with open(clean_name, "w", encoding="utf-8") as f:
-            f.write(content)
+            f.write(cnt)
 
-        lines_count = len(content.splitlines())
-        return f"File '{clean_name}' saved successfully ({len(content)} characters, {lines_count} lines)."
+        # Also mirror to uploads directory if in root directory for easy access
+        if not parent_dir:
+            os.makedirs("uploads", exist_ok=True)
+            mirror_path = os.path.join("uploads", clean_name)
+            with open(mirror_path, "w", encoding="utf-8") as mf:
+                mf.write(cnt)
+
+        lines_count = len(cnt.splitlines())
+        return f"File '{clean_name}' saved successfully ({len(cnt)} characters, {lines_count} lines)."
 
     except Exception as e:
         return f"Error writing to file '{filename}': {str(e)}"
 
 
 @mcp.tool()
-def file_write(filename: str, content: str):
+def file_write(filename: str = "", content: str = "", file_path: str = "", text: str = "", **kwargs):
     """Create or update a local file with the provided text content. Example: 'notes.txt'."""
-    return write_file(filename, content)
+    return write_file(filename=filename, content=content, file_path=file_path, text=text, **kwargs)
 
 
 # =====================================

@@ -4,10 +4,13 @@ Wraps Agent_Server.py tools into a web chat interface.
 Deployable free on Render / Railway / Koyeb.
 """
 
+from __future__ import annotations
+
 import os
 import re
 import uuid
 import warnings
+from typing import Optional, List
 
 # Set working directory so Agent_Server.py can find its relative paths (PDF, ChromaDB)
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
@@ -281,6 +284,12 @@ async def upload_document(file: UploadFile = File(...)):
     if len(contents) > 15 * 1024 * 1024:
         raise HTTPException(400, "File too large (max 15 MB).")
 
+    # Save copy to uploads/ directory for direct file_read tool access
+    os.makedirs("uploads", exist_ok=True)
+    save_path = os.path.join("uploads", filename)
+    with open(save_path, "wb") as sf:
+        sf.write(contents)
+
     # Save to temp file for loaders
     tmp = tempfile.NamedTemporaryFile(delete=False, suffix=suffix)
     try:
@@ -329,6 +338,33 @@ async def upload_document(file: UploadFile = File(...)):
         raise HTTPException(500, f"Failed to process document: {e}")
     finally:
         os.unlink(tmp.name)
+
+
+@app.get("/files")
+async def list_files():
+    """List all available files in uploads directory."""
+    os.makedirs("uploads", exist_ok=True)
+    files = [f for f in os.listdir("uploads") if not f.startswith(".")]
+    file_list = []
+    for f in files:
+        f_path = os.path.join("uploads", f)
+        file_list.append({
+            "name": f,
+            "size": os.path.getsize(f_path) if os.path.isfile(f_path) else 0,
+        })
+    return {"files": file_list}
+
+
+@app.get("/files/{filename}")
+async def get_file(filename: str):
+    """Download a file from uploads or current directory."""
+    clean_name = os.path.basename(filename)
+    upload_path = os.path.join("uploads", clean_name)
+    if os.path.exists(upload_path) and os.path.isfile(upload_path):
+        return FileResponse(upload_path, filename=clean_name)
+    if os.path.exists(clean_name) and os.path.isfile(clean_name):
+        return FileResponse(clean_name, filename=clean_name)
+    raise HTTPException(404, "File not found")
 
 
 @app.get("/health")

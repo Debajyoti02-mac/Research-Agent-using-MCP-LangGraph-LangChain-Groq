@@ -608,16 +608,50 @@
         }
     });
 
-    // Suggestion cards
-    function bindSuggestions() {
-        document.querySelectorAll(".suggestion-card").forEach((card) => {
-            card.addEventListener("click", () => {
-                const query = card.dataset.query;
-                if (query) sendMessage(query);
+    // ── Theme Manager ──
+    const themeBtn = document.getElementById("themeBtn");
+    const themeDropdown = document.getElementById("themeDropdown");
+    const themeOptions = document.querySelectorAll(".theme-option");
+
+    function applyTheme(themeName) {
+        document.documentElement.setAttribute("data-theme", themeName);
+        localStorage.setItem("research_agent_theme", themeName);
+        themeOptions.forEach((opt) => {
+            if (opt.dataset.theme === themeName) {
+                opt.classList.add("active");
+            } else {
+                opt.classList.remove("active");
+            }
+        });
+    }
+
+    // Initialize theme from storage
+    const savedTheme = localStorage.getItem("research_agent_theme") || "cosmic";
+    applyTheme(savedTheme);
+
+    if (themeBtn && themeDropdown) {
+        themeBtn.addEventListener("click", (e) => {
+            e.stopPropagation();
+            themeDropdown.hidden = !themeDropdown.hidden;
+        });
+
+        document.addEventListener("click", (e) => {
+            if (!themeDropdown.contains(e.target) && e.target !== themeBtn) {
+                themeDropdown.hidden = true;
+            }
+        });
+
+        themeOptions.forEach((btn) => {
+            btn.addEventListener("click", (e) => {
+                e.stopPropagation();
+                const selected = btn.dataset.theme;
+                if (selected) {
+                    applyTheme(selected);
+                    themeDropdown.hidden = true;
+                }
             });
         });
     }
-    bindSuggestions();
 
     // Focus input on page load
     userInput.focus();
