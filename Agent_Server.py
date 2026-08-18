@@ -231,7 +231,7 @@ def weather(location: str):
 # File Read
 # =====================================
 
-def _find_file_case_insensitive(filename: str, search_dirs=("uploads", ".")):
+def _find_file_case_insensitive(filename: str, search_dirs=(".",)):
     target = os.path.basename(filename).strip().strip("\"'").lower()
     for d in search_dirs:
         if os.path.exists(d) and os.path.isdir(d):
@@ -240,11 +240,6 @@ def _find_file_case_insensitive(filename: str, search_dirs=("uploads", ".")):
                     return os.path.join(d, f)
                 if os.path.splitext(f)[0].lower() == os.path.splitext(target)[0].lower():
                     return os.path.join(d, f)
-    # If single document exists in uploads
-    if os.path.exists("uploads") and os.path.isdir("uploads"):
-        files = [f for f in os.listdir("uploads") if not f.startswith(".")]
-        if len(files) == 1:
-            return os.path.join("uploads", files[0])
     return None
 
 
@@ -256,13 +251,7 @@ def file_read(filename: str = "", file_path: str = "", path: str = "", **kwargs)
         clean_name = str(raw_name).strip().strip("\"'")
 
         if not clean_name:
-            # Check if there is a file in uploads directory to default to
-            if os.path.exists("uploads") and os.path.isdir("uploads"):
-                files = [f for f in os.listdir("uploads") if not f.startswith(".")]
-                if files:
-                    clean_name = files[0]
-            if not clean_name:
-                return "Error: No filename provided to read."
+            return "Error: No filename provided to read."
 
         found_path = None
         if os.path.exists(clean_name) and os.path.isfile(clean_name):
@@ -316,7 +305,7 @@ def read_file(filename: str = "", file_path: str = "", path: str = "", **kwargs)
 
 @mcp.tool()
 def write_file(filename: str = "", content: str = "", file_path: str = "", text: str = "", **kwargs):
-    """Create or update a file with the provided text content. Saves in 'uploads/' directory by default. Example: 'notes.txt'."""
+    """Create or update a local file with the provided text content. Example: 'notes.txt'."""
     try:
         fname = filename or file_path or kwargs.get("path") or kwargs.get("name") or "output.txt"
         cnt = content or text or kwargs.get("data") or kwargs.get("body") or ""
@@ -325,21 +314,15 @@ def write_file(filename: str = "", content: str = "", file_path: str = "", text:
         if len(cnt) > 100000:
             return f"Error: Content too large ({len(cnt)} chars, max allowed is 100,000 chars)."
 
-        # If a direct filename without directory is given, save in uploads/
-        if not os.path.dirname(clean_name):
-            os.makedirs("uploads", exist_ok=True)
-            target_path = os.path.join("uploads", clean_name)
-        else:
-            target_path = clean_name
-            parent_dir = os.path.dirname(target_path)
-            if parent_dir and not os.path.exists(parent_dir):
-                os.makedirs(parent_dir, exist_ok=True)
+        parent_dir = os.path.dirname(clean_name)
+        if parent_dir and not os.path.exists(parent_dir):
+            os.makedirs(parent_dir, exist_ok=True)
 
-        with open(target_path, "w", encoding="utf-8") as f:
+        with open(clean_name, "w", encoding="utf-8") as f:
             f.write(cnt)
 
         lines_count = len(cnt.splitlines())
-        return f"File '{clean_name}' saved successfully in '{target_path}' ({len(cnt)} characters, {lines_count} lines)."
+        return f"File '{clean_name}' saved successfully ({len(cnt)} characters, {lines_count} lines)."
 
     except Exception as e:
         return f"Error writing to file '{filename}': {str(e)}"
@@ -347,7 +330,7 @@ def write_file(filename: str = "", content: str = "", file_path: str = "", text:
 
 @mcp.tool()
 def file_write(filename: str = "", content: str = "", file_path: str = "", text: str = "", **kwargs):
-    """Create or update a file with the provided text content. Saves in 'uploads/' by default. Example: 'notes.txt'."""
+    """Create or update a local file with the provided text content. Example: 'notes.txt'."""
     return write_file(filename=filename, content=content, file_path=file_path, text=text, **kwargs)
 
 

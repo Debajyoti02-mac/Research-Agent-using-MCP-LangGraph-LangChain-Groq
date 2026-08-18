@@ -1,7 +1,10 @@
 """
 Streamlit Web Application for the Research Agent.
 Interactive UI powered by MCP, LangGraph, LangChain & Groq.
+Designed with a Pure OLED Black luxury aesthetic, masked API credentials, and modern typography.
 """
+
+from __future__ import annotations
 
 import os
 import re
@@ -9,6 +12,7 @@ import uuid
 import tempfile
 import warnings
 import streamlit as st
+from typing import Optional, List
 
 # Set working directory so Agent_Server can resolve relative paths
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
@@ -43,7 +47,7 @@ from Agent_Server import (
 
 
 # ──────────────────────────────────────────────
-# Page Configuration & Styling
+# Page Configuration
 # ──────────────────────────────────────────────
 st.set_page_config(
     page_title="Research Agent",
@@ -52,53 +56,84 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
+
+# ──────────────────────────────────────────────
+# Pure OLED Black Luxury Theme & Google Font
+# ──────────────────────────────────────────────
 st.markdown(
     """
     <style>
-    /* Global Styles */
+    @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+    /* Global Pure Black App Background */
     .stApp {
-        background-color: #0b0f19;
-        color: #f3f4f6;
+        background-color: #000000 !important;
+        color: #f1f5f9 !important;
+        font-family: 'Outfit', sans-serif !important;
     }
     
-    /* Header styling */
+    [data-testid="stSidebar"] {
+        background-color: #050507 !important;
+        border-right: 1px solid rgba(255, 255, 255, 0.08) !important;
+        font-family: 'Outfit', sans-serif !important;
+    }
+
+    /* Hero Header */
+    .hero-container {
+        background: rgba(14, 15, 22, 0.7);
+        border: 1px solid rgba(255, 255, 255, 0.09);
+        border-radius: 18px;
+        padding: 26px 30px;
+        margin-bottom: 22px;
+        backdrop-filter: blur(16px);
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+    }
     .main-title {
-        font-size: 2.2rem;
+        font-family: 'Space Grotesk', sans-serif;
+        font-size: 2.3rem;
         font-weight: 800;
-        background: linear-gradient(135deg, #a855f7 0%, #3b82f6 50%, #06b6d4 100%);
+        letter-spacing: -0.02em;
+        background: linear-gradient(135deg, #c084fc 0%, #60a5fa 50%, #2dd4bf 100%);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
-        margin-bottom: 0.2rem;
+        margin-bottom: 6px;
     }
     .sub-title {
         font-size: 0.95rem;
-        color: #9ca3af;
-        margin-bottom: 1.5rem;
+        color: #94a3b8;
+        font-weight: 400;
+        line-height: 1.5;
     }
-    
+
+    /* Cards */
+    .status-card {
+        background: rgba(255, 255, 255, 0.025);
+        border: 1px solid rgba(255, 255, 255, 0.07);
+        border-radius: 12px;
+        padding: 14px 16px;
+        margin-bottom: 14px;
+    }
+
     /* Tool Badge */
     .tool-badge {
         display: inline-flex;
         align-items: center;
-        gap: 4px;
-        background: rgba(139, 92, 246, 0.15);
-        color: #c084fc;
-        border: 1px solid rgba(139, 92, 246, 0.35);
-        border-radius: 6px;
-        padding: 2px 8px;
-        font-size: 0.75rem;
+        gap: 5px;
+        background: rgba(168, 85, 247, 0.14);
+        color: #d8b4fe;
+        border: 1px solid rgba(168, 85, 247, 0.3);
+        border-radius: 8px;
+        padding: 3px 10px;
+        font-size: 0.76rem;
         font-weight: 600;
-        margin-top: 6px;
-        margin-right: 4px;
+        margin-top: 8px;
+        margin-right: 6px;
+        font-family: 'JetBrains Mono', monospace;
     }
-    
-    /* Sidebar card styling */
-    .sidebar-card {
-        background: rgba(255, 255, 255, 0.03);
-        border: 1px solid rgba(255, 255, 255, 0.08);
-        border-radius: 12px;
-        padding: 16px;
-        margin-bottom: 16px;
+
+    /* Code blocks */
+    code, pre {
+        font-family: 'JetBrains Mono', monospace !important;
     }
     </style>
     """,
@@ -110,9 +145,9 @@ st.markdown(
 # Tools & Agent Initialization
 # ──────────────────────────────────────────────
 
-def _calculator(expression: str) -> str:
+def _calculator(expression: str = "", exec: str = "", expr: str = "", **kwargs) -> str:
     """Evaluates a mathematical expression and returns the exact numerical answer. Example input: '25 * 10 + 5'."""
-    return calculator(expression)
+    return calculator(expression=expression, exec=exec, expr=expr, **kwargs)
 
 
 def _weather(location: str) -> str:
@@ -120,14 +155,14 @@ def _weather(location: str) -> str:
     return weather(location)
 
 
-def _file_read(filename: str) -> str:
-    """Reads the text content of a local file on the filesystem. Example: 'notes.txt'"""
-    return file_read(filename)
+def _file_read(filename: str = "", file_path: str = "", path: str = "", **kwargs) -> str:
+    """Reads the text content of a local file or PDF on the filesystem. Example: 'notes.txt'"""
+    return file_read(filename=filename, file_path=file_path, path=path, **kwargs)
 
 
-def _write_file(filename: str, content: str) -> str:
+def _write_file(filename: str = "", content: str = "", file_path: str = "", text: str = "", **kwargs) -> str:
     """Creates or updates a local file on the filesystem with the provided text content."""
-    return write_file(filename, content)
+    return write_file(filename=filename, content=content, file_path=file_path, text=text, **kwargs)
 
 
 def _hybrid_rag(query: str) -> str:
@@ -152,7 +187,7 @@ tools = [
 ]
 
 SYSTEM_PROMPT = (
-    "You are a helpful and concise Research AI Assistant built with MCP, LangGraph, LangChain & Groq.\n"
+    "You are a helpful, accurate, and concise Research AI Assistant built with MCP, LangGraph, LangChain & Groq.\n"
     "- For calculations and arithmetic: ALWAYS use the calculator tool. Reply with ONLY the final numerical answer directly without equations, formulas, LaTeX, steps, or conversation.\n"
     "- For uploaded documents, PDFs, or research questions: use file_read or Hybrid_Rag to read and analyze document content.\n"
     "- For local files: use file_read to read files and write_file to save files.\n"
@@ -182,10 +217,13 @@ TOOL_ICONS = {
     "calculator": "🧮",
     "weather": "🌤️",
     "file_read": "📖",
+    "read_file": "📖",
     "write_file": "✍️",
+    "file_write": "✍️",
     "Hybrid_Rag": "📄",
     "Research_tool": "🔬",
 }
+
 
 def clean_and_deduplicate(text: str, calc_output: str = None) -> str:
     """Sanitizes text, enforces bare numerical answers for calculations, and removes redundant repetitions."""
@@ -195,7 +233,6 @@ def clean_and_deduplicate(text: str, calc_output: str = None) -> str:
         return ""
     text = text.strip()
 
-    # Extract bare number if response is a calculation expression e.g. (12 \times 8 + 9 = 105) or 12 * 8 = 96 or **105**
     eq_match = re.search(r'=\s*\*?\*?([0-9\.\-]+)\*?\*?\s*\)?\.?$', text)
     if eq_match:
         return eq_match.group(1).strip()
@@ -208,7 +245,7 @@ def clean_and_deduplicate(text: str, calc_output: str = None) -> str:
     if bold_match:
         return bold_match.group(1).strip()
 
-    # 1. Deduplicate consecutive identical lines/paragraphs
+    # Deduplicate consecutive identical lines
     lines = text.split("\n")
     cleaned_lines = []
     for l in lines:
@@ -218,7 +255,7 @@ def clean_and_deduplicate(text: str, calc_output: str = None) -> str:
         cleaned_lines.append(l)
     text = "\n".join(cleaned_lines).strip()
 
-    # 2. Fix repeated exact phrases or concatenated digits (e.g. '469469', '100 100')
+    # Fix repeated exact phrases
     match = re.match(r"^(.+?)(?:[\s,]*\1)+$", text, flags=re.DOTALL)
     if match and len(match.group(1)) >= 1:
         text = match.group(1).strip()
@@ -227,22 +264,15 @@ def clean_and_deduplicate(text: str, calc_output: str = None) -> str:
 
 
 def handle_tool_recovery(error_str: str):
-    """
-    Recovers from Groq's 400 'Failed to parse tool call arguments as JSON' error
-    by sanitizing invalid escape codes and executing the intended tool directly.
-    """
+    """Recovers from Groq's 400 JSON parse errors on tool payloads."""
     import json
     try:
-        # Match failed_generation payload
         match = re.search(r"'failed_generation':\s*'(.*?)'\s*\}\s*\}", error_str, re.DOTALL)
         if not match:
-            match = re.search(r'(\{"name":\s*"write_file".*?\})', error_str, re.DOTALL)
+            match = re.search(r'(\{"name":\s*"(?:write_file|file_write)".*?\})', error_str, re.DOTALL)
 
         if match:
-            raw_payload = match.group(1)
-            # Unescape double-escaped quotes and newlines if present
-            raw_payload = raw_payload.replace("\\'", "'")
-            # Sanitize invalid escape sequences (e.g. \s, \c) into valid JSON escapes
+            raw_payload = match.group(1).replace("\\'", "'")
             sanitized = re.sub(r'\\(?![/"\\bfnrtu])', r'\\\\', raw_payload)
             parsed = json.loads(sanitized)
 
@@ -251,18 +281,18 @@ def handle_tool_recovery(error_str: str):
             if isinstance(args, str):
                 args = json.loads(re.sub(r'\\(?![/"\\bfnrtu])', r'\\\\', args))
 
-            if tool_name == "write_file":
-                filename = args.get("filename", "output.txt")
-                content = args.get("content", "")
-                res = write_file(filename, content)
+            if tool_name in ("write_file", "file_write"):
+                filename = args.get("filename") or args.get("file_path") or "output.txt"
+                content = args.get("content") or args.get("text") or ""
+                res = write_file(filename=filename, content=content)
                 return res, ["write_file"]
-            elif tool_name == "file_read":
-                filename = args.get("filename", "")
-                res = file_read(filename)
+            elif tool_name in ("file_read", "read_file"):
+                filename = args.get("filename") or args.get("file_path") or ""
+                res = file_read(filename=filename)
                 return res, ["file_read"]
             elif tool_name == "calculator":
                 expr = args.get("expression") or args.get("exec") or ""
-                res = calculator(expr)
+                res = calculator(expression=expr)
                 return res, ["calculator"]
     except Exception:
         pass
@@ -281,7 +311,7 @@ if "messages" not in st.session_state:
 
 
 # ──────────────────────────────────────────────
-# Sidebar: Document Management & Config
+# Sidebar: Safe API Masking & Knowledge Base
 # ──────────────────────────────────────────────
 
 groq_key = os.getenv("GROQ_API_KEY")
@@ -293,34 +323,49 @@ with st.sidebar:
     st.markdown("### 🔬 Research Agent")
     st.markdown(
         """
-        **Powered by:**
-        - **Groq LLM** (Ultra-fast inference)
+        **Architecture Stack:**
+        - **Groq LLM** (`openai/gpt-oss-120b`)
         - **LangGraph** (ReAct Agent Framework)
-        - **MCP** (Model Context Protocol)
-        - **Hybrid RAG** (ChromaDB + BM25)
+        - **MCP Protocol** (FastMCP Tools)
+        - **Hybrid RAG** (ChromaDB Vector Retrieval)
         """
     )
     st.divider()
 
-    st.markdown("### 🔑 API Configuration")
-    user_api_key = st.text_input(
-        "Groq API Key",
-        value=groq_key or "",
-        type="password",
-        placeholder="gsk_...",
-        help="Get your free API key at https://console.groq.com/keys",
-    )
-    if user_api_key:
-        groq_key = user_api_key
-        os.environ["GROQ_API_KEY"] = user_api_key
+    # ── Masked API Key Configuration ──
+    st.markdown("##### 🔑 API Key Configuration")
+    if groq_key:
+        st.success("🔒 **Groq API Key**: Loaded & Secured from `.env`")
+        with st.expander("Change API Key"):
+            new_key = st.text_input(
+                "Enter New Key",
+                type="password",
+                placeholder="gsk_...",
+                help="Override environment key for this session",
+            )
+            if new_key:
+                groq_key = new_key
+                os.environ["GROQ_API_KEY"] = new_key
+                st.success("Custom key applied.")
+    else:
+        user_api_key = st.text_input(
+            "Enter Groq API Key",
+            type="password",
+            placeholder="gsk_...",
+            help="Get your free key at https://console.groq.com/keys",
+        )
+        if user_api_key:
+            groq_key = user_api_key
+            os.environ["GROQ_API_KEY"] = user_api_key
 
     st.divider()
 
-    st.markdown("### 📄 Document Knowledge Base")
+    # ── Document Knowledge Base ──
+    st.markdown("##### 📄 Document Knowledge Base")
     uploaded_file = st.file_uploader(
-        "Upload PDF, TXT or Markdown Document",
+        "Upload PDF, TXT, MD, CSV",
         type=["pdf", "txt", "md", "csv"],
-        help="Attached documents are automatically chunked and indexed into ChromaDB vectors for instant Hybrid RAG search.",
+        help="Attached documents are chunked and indexed into ChromaDB vectors for Hybrid RAG.",
     )
 
     if uploaded_file is not None:
@@ -329,16 +374,13 @@ with st.sidebar:
             st.session_state[file_key] = False
 
         if not st.session_state[file_key]:
-            if st.button("📥 Index Document into Knowledge Base", use_container_width=True, type="primary"):
-                with st.spinner("Processing & indexing document chunks into ChromaDB..."):
+            if st.button("📥 Index Document", use_container_width=True, type="primary"):
+                with st.spinner("Processing & indexing into ChromaDB..."):
                     try:
                         filename = uploaded_file.name
                         suffix = os.path.splitext(filename)[1].lower()
-                        contents = uploaded_file.read()
-
-                        # Save copy to uploads/ directory for direct file_read tool access
-                        os.makedirs("uploads", exist_ok=True)
-                        save_path = os.path.join("uploads", filename)
+                        # Save directly to the original storage (root project directory)
+                        save_path = filename
                         with open(save_path, "wb") as sf:
                             sf.write(contents)
 
@@ -397,18 +439,18 @@ with st.sidebar:
                     except Exception as e:
                         st.error(f"Upload failed: {e}")
         else:
-            st.success(f"✓ `{uploaded_file.name}` is indexed and ready for queries.")
+            st.success(f"✓ `{uploaded_file.name}` is indexed.")
 
     try:
         Agent_Server.initialize_rag()
         total_chunks = Agent_Server.collection.count() if Agent_Server.collection else 0
-        st.info(f"📊 **Knowledge Base Index:** {total_chunks} active chunks")
+        st.caption(f"📊 **Knowledge Base:** {total_chunks} active chunks")
     except Exception:
         pass
 
     st.divider()
 
-    if st.button("🧹 Clear Chat / New Session", use_container_width=True):
+    if st.button("🧹 Clear Chat History", use_container_width=True):
         st.session_state.thread_id = str(uuid.uuid4())
         st.session_state.messages = []
         st.rerun()
@@ -418,16 +460,23 @@ with st.sidebar:
 # Main Chat Area
 # ──────────────────────────────────────────────
 
-st.markdown('<div class="main-title">Research Agent</div>', unsafe_allow_html=True)
-st.markdown('<div class="sub-title">Ask research questions, run math calculations, query documents, and manage files.</div>', unsafe_allow_html=True)
+st.markdown(
+    """
+    <div class="hero-container">
+        <div class="main-title">🔬 Research Agent</div>
+        <div class="sub-title">AI Research Assistant powered by MCP, LangGraph, LangChain & Groq. Query papers, generate code & files, perform math, and inspect documents.</div>
+    </div>
+    """,
+    unsafe_allow_html=True,
+)
 
 if not groq_key:
-    st.warning("⚠️ **Groq API Key Required**: Please enter your Groq API Key in the sidebar (or add `GROQ_API_KEY` to your Streamlit Cloud Secrets) to activate the Research Agent.")
-    st.info("Don't have an API key? Get one for free in 30 seconds at [console.groq.com/keys](https://console.groq.com/keys).")
+    st.warning("⚠️ **Groq API Key Required**: Please enter your Groq API Key in the sidebar to activate the Research Agent.")
+    st.info("Don't have an API key? Get one for free at [console.groq.com/keys](https://console.groq.com/keys).")
 else:
     agent = get_agent(groq_key)
 
-    # Suggestion Chips if no messages yet
+    # Suggestion Chips if chat is empty
     if not st.session_state.messages:
         st.markdown("##### 💡 Suggested Questions")
         col1, col2 = st.columns(2)
@@ -456,10 +505,10 @@ else:
                 )
                 st.markdown(f"<div>{badges_html}</div>", unsafe_allow_html=True)
 
-    # User input box
-    user_input = st.chat_input("Ask a question about your research or enter a calculation…")
+    # User chat input
+    user_input = st.chat_input("Ask a research question, enter a calculation, or request file operations…")
 
-    # Check if last message needs AI response (e.g. from suggestion buttons or chat input)
+    # Check pending message
     pending_prompt = None
     if user_input:
         st.session_state.messages.append({"role": "user", "content": user_input, "tools": []})
@@ -519,9 +568,9 @@ else:
                             "tools": tools_used,
                         }
                     )
+                    st.rerun()
 
                 except Exception as e:
-                    # Attempt recovery if Groq failed on tool JSON parsing
                     recovered_resp, recovered_tools = handle_tool_recovery(str(e))
                     if recovered_resp:
                         st.markdown(recovered_resp)
@@ -537,5 +586,6 @@ else:
                                 "tools": recovered_tools,
                             }
                         )
+                        st.rerun()
                     else:
                         st.error(f"Error generating response: {e}")
