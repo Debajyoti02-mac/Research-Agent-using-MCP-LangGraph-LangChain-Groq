@@ -1,0 +1,28 @@
+/* 1. Create a table for employees */
+CREATE TABLE employees (
+    employee_id INT PRIMARY KEY,
+    first_name VARCHAR(50),
+    last_name VARCHAR(50),
+    hire_date DATE,
+    salary DECIMAL(10,2)
+);
+
+/* 2. Insert sample records */
+INSERT INTO employees (employee_id, first_name, last_name, hire_date, salary) VALUES
+    (1, 'John', 'Doe', '2022-01-15', 60000.00),
+    (2, 'Jane', 'Smith', '2021-07-30', 72000.00),
+    (3, 'Alice', 'Johnson', '2023-03-10', 55000.00);
+
+/* 3. Retrieve employees with salary above 60,000 */
+SELECT employee_id, first_name, last_name, salary
+FROM employees
+WHERE salary > 60000;
+
+/* 4. Update salary for a specific employee */
+UPDATE employees
+SET salary = salary * 1.05
+WHERE employee_id = 1;
+
+/* 5. Delete employees hired before 2022 */
+DELETE FROM employees
+WHERE hire_date < '2022-01-01';

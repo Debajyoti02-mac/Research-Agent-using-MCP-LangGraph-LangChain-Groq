@@ -1,0 +1,24 @@
+/* 1. Retrieve all customers from the Customers table */
+SELECT * FROM Customers;
+
+/* 2. Find orders placed in the last 30 days */
+SELECT OrderID, CustomerID, OrderDate
+FROM Orders
+WHERE OrderDate >= DATE_SUB(CURDATE(), INTERVAL 30 DAY);
+
+/* 3. Get total sales per product */
+SELECT p.ProductName, SUM(od.Quantity * od.UnitPrice) AS TotalSales
+FROM OrderDetails od
+JOIN Products p ON od.ProductID = p.ProductID
+GROUP BY p.ProductName;
+
+/* 4. List employees who have not made any sales */
+SELECT e.EmployeeID, e.FirstName, e.LastName
+FROM Employees e
+LEFT JOIN Orders o ON e.EmployeeID = o.EmployeeID
+WHERE o.OrderID IS NULL;
+
+/* 5. Update the status of overdue invoices */
+UPDATE Invoices
+SET Status = 'Overdue'
+WHERE DueDate < CURDATE() AND Status <> 'Paid';

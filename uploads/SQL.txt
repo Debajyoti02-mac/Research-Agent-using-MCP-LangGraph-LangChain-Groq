@@ -1,0 +1,28 @@
+/* 1. Create a table for products */
+CREATE TABLE products (
+    product_id INT PRIMARY KEY,
+    name VARCHAR(100),
+    category VARCHAR(50),
+    price DECIMAL(10,2),
+    stock INT
+);
+
+/* 2. Insert sample product records */
+INSERT INTO products (product_id, name, category, price, stock) VALUES
+    (1, 'Laptop', 'Electronics', 999.99, 25),
+    (2, 'Desk Chair', 'Furniture', 149.95, 40),
+    (3, 'Coffee Mug', 'Kitchen', 12.99, 150);
+
+/* 3. Select products with price greater than 100 */
+SELECT product_id, name, price
+FROM products
+WHERE price > 100;
+
+/* 4. Update stock for a specific product */
+UPDATE products
+SET stock = stock - 5
+WHERE product_id = 1;
+
+/* 5. Delete products that are out of stock */
+DELETE FROM products
+WHERE stock = 0;
